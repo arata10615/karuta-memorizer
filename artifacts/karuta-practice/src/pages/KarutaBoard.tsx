@@ -3,55 +3,42 @@ import {
   ALL_CARDS,
   MY_CARD_IDS,
   OPPONENT_CARD_IDS,
-  OPPONENT_ROW_SIZES,
-  SELF_COLS,
-  SELF_ROWS,
-  shuffleArray,
-  splitIntoRows,
+  GRID_COLS,
+  GRID_ROWS,
+  placeCardsInGrid,
+  splitTextIntoColumns,
 } from "@/data/karuta";
 
 type GameState = "placing" | "memorizing" | "stopped";
-
-interface BoardCard {
-  cardId: number;
-  faceUp: boolean;
-}
-
-type SelfGrid = (number | null)[][];
+type Grid = (number | null)[][];
 
 const OPPONENT_ROW_LABELS = ["下段", "中段", "上段"];
 const MY_ROW_LABELS = ["上段", "中段", "下段"];
 
-function createEmptyGrid(): SelfGrid {
-  return Array.from({ length: SELF_ROWS }, () =>
-    Array.from({ length: SELF_COLS }, () => null)
+function createEmptyGrid(): Grid {
+  return Array.from({ length: GRID_ROWS }, () =>
+    Array.from({ length: GRID_COLS }, () => null)
   );
 }
 
 export default function KarutaBoard() {
   const [gameState, setGameState] = useState<GameState>("placing");
   const [elapsed, setElapsed] = useState(0);
-  const [opponentRows, setOpponentRows] = useState<BoardCard[][]>([]);
-  const [selfGrid, setSelfGrid] = useState<SelfGrid>(createEmptyGrid);
+  const [opGrid, setOpGrid] = useState<Grid>(createEmptyGrid);
+  const [selfGrid, setSelfGrid] = useState<Grid>(createEmptyGrid);
   const [handCards, setHandCards] = useState<number[]>([...MY_CARD_IDS]);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
-  const [selfFaceUp, setSelfFaceUp] = useState<Record<number, boolean>>({});
-  const [opFaceUp, setOpFaceUp] = useState<Record<number, boolean>>({});
+  const [faceUpMap, setFaceUpMap] = useState<Record<number, boolean>>({});
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const initBoard = useCallback(() => {
-    const opShuffled = shuffleArray([...OPPONENT_CARD_IDS]);
-    const opRowsData = splitIntoRows(opShuffled, OPPONENT_ROW_SIZES).map((row) =>
-      row.map((id) => ({ cardId: id, faceUp: true }))
-    );
-    setOpponentRows(opRowsData);
+    setOpGrid(placeCardsInGrid(OPPONENT_CARD_IDS));
     setSelfGrid(createEmptyGrid());
     setHandCards([...MY_CARD_IDS]);
     setSelectedCard(null);
     setElapsed(0);
     setGameState("placing");
-    setSelfFaceUp({});
-    setOpFaceUp({});
+    setFaceUpMap({});
   }, []);
 
   useEffect(() => { initBoard(); }, [initBoard]);
@@ -78,18 +65,17 @@ export default function KarutaBoard() {
             return g;
           });
           setHandCards((prev) => [...prev.filter((c) => c !== selectedCard), existing]);
-          setSelectedCard(null);
         } else {
           setSelfGrid((prev) => {
             const g = prev.map((r) => [...r]);
-            for (let r = 0; r < SELF_ROWS; r++)
-              for (let c = 0; c < SELF_COLS; c++)
+            for (let r = 0; r < GRID_ROWS; r++)
+              for (let c = 0; c < GRID_COLS; c++)
                 if (g[r][c] === selectedCard) g[r][c] = existing;
             g[row][col] = selectedCard;
             return g;
           });
-          setSelectedCard(null);
         }
+        setSelectedCard(null);
       } else {
         setSelfGrid((prev) => {
           const g = prev.map((r) => [...r]);
@@ -114,8 +100,8 @@ export default function KarutaBoard() {
     } else {
       setSelfGrid((prev) => {
         const g = prev.map((r) => [...r]);
-        for (let r = 0; r < SELF_ROWS; r++)
-          for (let c = 0; c < SELF_COLS; c++)
+        for (let r = 0; r < GRID_ROWS; r++)
+          for (let c = 0; c < GRID_COLS; c++)
             if (g[r][c] === selectedCard) g[r][c] = null;
         g[row][col] = selectedCard;
         return g;
@@ -130,21 +116,31 @@ export default function KarutaBoard() {
       return;
     }
     if (gameState === "stopped") {
-      setSelfFaceUp((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
+      setFaceUpMap((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
     }
   };
 
   const handleOpCardClick = (cardId: number) => {
     if (gameState === "stopped") {
-      setOpFaceUp((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
+      setFaceUpMap((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
     }
   };
 
   const autoPlace = () => {
     const remaining = [...handCards];
     const g = selfGrid.map((r) => [...r]);
-    for (let r = 0; r < SELF_ROWS && remaining.length > 0; r++) {
-      for (let c = 0; c < SELF_COLS && remaining.length > 0; c++) {
+    const rowCounts = [10, 8, 7];
+    for (let r = GRID_ROWS - 1; r >= 0 && remaining.length > 0; r--) {
+      let placed = g[r].filter((c) => c !== null).length;
+      for (let c = 0; c < GRID_COLS && remaining.length > 0 && placed < rowCounts[r]; c++) {
+        if (g[r][c] === null) {
+          g[r][c] = remaining.shift()!;
+          placed++;
+        }
+      }
+    }
+    for (let r = 0; r < GRID_ROWS && remaining.length > 0; r++) {
+      for (let c = 0; c < GRID_COLS && remaining.length > 0; c++) {
         if (g[r][c] === null) {
           g[r][c] = remaining.shift()!;
         }
@@ -166,11 +162,10 @@ export default function KarutaBoard() {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     setGameState("stopped");
     const allDown: Record<number, boolean> = {};
-    selfGrid.flat().forEach((id) => { if (id !== null) allDown[id] = false; });
-    setSelfFaceUp(allDown);
-    const opDown: Record<number, boolean> = {};
-    opponentRows.flat().forEach((c) => { opDown[c.cardId] = false; });
-    setOpFaceUp(opDown);
+    [...selfGrid.flat(), ...opGrid.flat()].forEach((id) => {
+      if (id !== null) allDown[id] = false;
+    });
+    setFaceUpMap(allDown);
   };
 
   const reset = () => {
@@ -188,16 +183,16 @@ export default function KarutaBoard() {
 
   const getCard = (id: number) => ALL_CARDS.find((c) => c.id === id)!;
 
-  const isFaceUp = (cardId: number, field: "my" | "op") => {
+  const isFaceUp = (cardId: number) => {
     if (gameState === "placing" || gameState === "memorizing") return true;
-    if (field === "my") return selfFaceUp[cardId] ?? false;
-    return opFaceUp[cardId] ?? false;
+    return faceUpMap[cardId] ?? false;
   };
 
-  const renderCardContent = (cardId: number, field: "my" | "op", canFlip: boolean) => {
+  const renderCardInSlot = (cardId: number, field: "my" | "op", canFlip: boolean) => {
     const karuta = getCard(cardId);
-    const faceUp = isFaceUp(cardId, field);
+    const faceUp = isFaceUp(cardId);
     const isSelected = selectedCard === cardId;
+    const cols = splitTextIntoColumns(karuta.shimoHiragana);
     return (
       <div
         className={`karuta-card ${faceUp ? "face-up" : "face-down"} ${canFlip ? "can-flip" : ""} ${isSelected ? "selected" : ""}`}
@@ -205,7 +200,11 @@ export default function KarutaBoard() {
       >
         <div className="card-inner">
           <div className="card-front">
-            <span className="card-text">{karuta.shimoHiragana}</span>
+            <div className="card-text-3col">
+              {cols.map((col, i) => (
+                <span key={i} className="card-col">{col}</span>
+              ))}
+            </div>
             <span className="card-no">No.{karuta.id}</span>
           </div>
           <div className="card-back">
@@ -215,6 +214,43 @@ export default function KarutaBoard() {
       </div>
     );
   };
+
+  const renderGrid = (
+    grid: Grid,
+    field: "my" | "op",
+    rowLabels: string[],
+    fieldLabel: string,
+    accentColor: string,
+    isEditable: boolean
+  ) => (
+    <div className="field-wrap">
+      <div className="field-name-vertical" style={{ color: accentColor, borderColor: accentColor }}>
+        {fieldLabel}
+      </div>
+      <div className="field-rows">
+        {grid.map((row, rIdx) => (
+          <div key={rIdx} className="row-wrap">
+            <div className="card-row grid-row">
+              {row.map((cardId, cIdx) => (
+                <div
+                  key={cIdx}
+                  className={`card-slot ${cardId !== null ? "filled" : "empty"} ${
+                    selectedCard !== null && cardId === null && isEditable ? "droppable" : ""
+                  }`}
+                  onClick={() => isEditable && cardId === null ? handleSlotClick(rIdx, cIdx) : undefined}
+                >
+                  {cardId !== null && renderCardInSlot(cardId, field, gameState === "stopped")}
+                </div>
+              ))}
+            </div>
+            <div className="row-label-box">
+              <span className="row-label">{rowLabels[rIdx]}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <div className="app-root">
@@ -263,28 +299,7 @@ export default function KarutaBoard() {
 
       <main className="board-main">
         <div className="board-area">
-          {/* 敵陣 — random 25 cards */}
-          <div className="field-wrap">
-            <div className="field-name-vertical" style={{ color: "#8b1a1a", borderColor: "#8b1a1a" }}>
-              相手陣
-            </div>
-            <div className="field-rows">
-              {opponentRows.map((row, rIdx) => (
-                <div key={rIdx} className="row-wrap">
-                  <div className="card-row">
-                    {row.map((card) => (
-                      <div key={card.cardId} className="card-slot filled">
-                        {renderCardContent(card.cardId, "op", gameState === "stopped")}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="row-label-box">
-                    <span className="row-label">{OPPONENT_ROW_LABELS[rIdx]}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {renderGrid(opGrid, "op", OPPONENT_ROW_LABELS, "相手陣", "#8b1a1a", false)}
 
           <div className="center-gap">
             <div className="center-line" />
@@ -292,36 +307,8 @@ export default function KarutaBoard() {
             <div className="center-line" />
           </div>
 
-          {/* 自陣 — 3×16 grid, user places cards */}
-          <div className="field-wrap">
-            <div className="field-name-vertical" style={{ color: "#1a3a6b", borderColor: "#1a3a6b" }}>
-              自　陣
-            </div>
-            <div className="field-rows">
-              {selfGrid.map((row, rIdx) => (
-                <div key={rIdx} className="row-wrap">
-                  <div className="card-row grid-row">
-                    {row.map((cardId, cIdx) => (
-                      <div
-                        key={cIdx}
-                        className={`card-slot ${cardId !== null ? "filled" : "empty"} ${
-                          selectedCard !== null && cardId === null && gameState === "placing" ? "droppable" : ""
-                        }`}
-                        onClick={() => cardId === null ? handleSlotClick(rIdx, cIdx) : undefined}
-                      >
-                        {cardId !== null && renderCardContent(cardId, "my", gameState === "stopped")}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="row-label-box">
-                    <span className="row-label">{MY_ROW_LABELS[rIdx]}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {renderGrid(selfGrid, "my", MY_ROW_LABELS, "自　陣", "#1a3a6b", gameState === "placing")}
 
-          {/* 手持ちカード */}
           {gameState === "placing" && handCards.length > 0 && (
             <div className="hand-area">
               <div className="hand-label">手持ち札（タップで選択→空きマスに配置）</div>
@@ -329,6 +316,7 @@ export default function KarutaBoard() {
                 {handCards.map((cardId) => {
                   const karuta = getCard(cardId);
                   const isSelected = selectedCard === cardId;
+                  const cols = splitTextIntoColumns(karuta.shimoHiragana);
                   return (
                     <div
                       key={cardId}
@@ -337,7 +325,11 @@ export default function KarutaBoard() {
                     >
                       <div className="card-inner">
                         <div className="card-front">
-                          <span className="card-text">{karuta.shimoHiragana}</span>
+                          <div className="card-text-3col">
+                            {cols.map((col, i) => (
+                              <span key={i} className="card-col">{col}</span>
+                            ))}
+                          </div>
                           <span className="card-no">No.{karuta.id}</span>
                         </div>
                       </div>

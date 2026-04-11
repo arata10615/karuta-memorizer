@@ -123,9 +123,36 @@ export const OPPONENT_CARD_IDS = [
   42, 44, 46, 48, 50,
 ];
 
-export const OPPONENT_ROW_SIZES = [9, 8, 8];
-export const SELF_COLS = 16;
-export const SELF_ROWS = 3;
+export const GRID_COLS = 16;
+export const GRID_ROWS = 3;
+
+export function placeCardsInGrid(cardIds: number[]): (number | null)[][] {
+  const shuffled = shuffleArray([...cardIds]);
+  const grid: (number | null)[][] = Array.from({ length: GRID_ROWS }, () =>
+    Array.from({ length: GRID_COLS }, () => null)
+  );
+  const rowCounts = [7, 8, 10];
+  let idx = 0;
+  for (let r = 0; r < GRID_ROWS; r++) {
+    const count = rowCounts[r];
+    for (let c = 0; c < count && idx < shuffled.length; c++) {
+      grid[r][c] = shuffled[idx++];
+    }
+  }
+  return grid;
+}
+
+export function splitTextIntoColumns(text: string): string[] {
+  const raw = text.replace(/\s+/g, "");
+  const len = raw.length;
+  const colSize = Math.ceil(len / 3);
+  const cols: string[] = [];
+  for (let i = 0; i < len; i += colSize) {
+    cols.push(raw.slice(i, i + colSize));
+  }
+  while (cols.length < 3) cols.push("");
+  return cols;
+}
 
 export function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];
