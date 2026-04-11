@@ -62,7 +62,6 @@
   --opaque-button-border-intensity: -8;
   --elevate-1: rgba(0,0,0,.03);
   --elevate-2: rgba(0,0,0,.08);
-
   --background: 42 35% 88%;
   --foreground: 30 30% 12%;
   --border: 35 20% 70%;
@@ -101,17 +100,16 @@
   --app-font-serif: 'Noto Serif JP', serif;
   --app-font-mono: Menlo, monospace;
   --radius: .375rem;
-  --shadow-2xs: 0 1px 2px rgba(0,0,0,.07);
-  --shadow-xs: 0 1px 3px rgba(0,0,0,.09);
-  --shadow-sm: 0 2px 4px rgba(0,0,0,.11);
-  --shadow: 0 2px 8px rgba(0,0,0,.13);
-  --shadow-md: 0 4px 12px rgba(0,0,0,.15);
-  --shadow-lg: 0 8px 20px rgba(0,0,0,.17);
-  --shadow-xl: 0 16px 32px rgba(0,0,0,.19);
-  --shadow-2xl: 0 24px 48px rgba(0,0,0,.21);
+  --shadow-sm: 0 2px 4px rgba(0,0,0,.18);
+  --shadow: 0 2px 8px rgba(0,0,0,.22);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.26);
+  --shadow-2xs: 0 1px 2px rgba(0,0,0,.10);
+  --shadow-xs: 0 1px 3px rgba(0,0,0,.12);
+  --shadow-lg: 0 8px 20px rgba(0,0,0,.28);
+  --shadow-xl: 0 16px 32px rgba(0,0,0,.30);
+  --shadow-2xl: 0 24px 48px rgba(0,0,0,.32);
   --tracking-normal: 0em;
   --spacing: 0.25rem;
-
   --sidebar-primary-border: hsl(var(--sidebar-primary));
   --sidebar-accent-border: hsl(var(--sidebar-accent));
   --primary-border: hsl(var(--primary));
@@ -126,27 +124,39 @@
   body { @apply font-sans antialiased bg-background text-foreground; }
 }
 
-/* ======================================
-   TATAMI / KARUTA BOARD LAYOUT
-   ====================================== */
+/* ===========================================
+   TATAMI BOARD ROOT
+   =========================================== */
 
 .app-root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #5c7a45;
+  /* Tatami weave texture */
+  background-color: #6b8c52;
   background-image:
-    repeating-linear-gradient(0deg, transparent, transparent 7px, rgba(0,0,0,0.04) 7px, rgba(0,0,0,0.04) 8px),
-    repeating-linear-gradient(90deg, transparent, transparent 7px, rgba(0,0,0,0.04) 7px, rgba(0,0,0,0.04) 8px);
-  /* tatami green mat texture */
+    repeating-linear-gradient(
+      90deg,
+      rgba(0,0,0,0) 0px, rgba(0,0,0,0) 6px,
+      rgba(0,0,0,0.055) 6px, rgba(0,0,0,0.055) 7px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0) 0px, rgba(0,0,0,0) 6px,
+      rgba(0,0,0,0.055) 6px, rgba(0,0,0,0.055) 7px
+    ),
+    linear-gradient(135deg, #6b8c52 0%, #5a7a40 50%, #638550 100%);
 }
 
-/* Header */
+/* ===========================================
+   HEADER
+   =========================================== */
+
 .app-header {
-  background: rgba(26,16,8,0.88);
-  backdrop-filter: blur(4px);
-  border-bottom: 2px solid rgba(200,160,80,0.5);
-  padding: 10px 20px;
+  background: rgba(18,10,4,0.9);
+  backdrop-filter: blur(6px);
+  border-bottom: 2px solid rgba(210,170,80,0.45);
+  padding: 9px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -154,7 +164,7 @@
   flex-wrap: wrap;
   position: sticky;
   top: 0;
-  z-index: 20;
+  z-index: 30;
 }
 
 .header-left {
@@ -165,16 +175,16 @@
 
 .app-title {
   font-family: 'Noto Serif JP', serif;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  color: #e8d5a0;
-  letter-spacing: 0.12em;
+  color: #ead595;
+  letter-spacing: 0.14em;
 }
 
 .app-subtitle {
   font-family: 'Noto Serif JP', serif;
-  font-size: 0.75rem;
-  color: #c8b07a;
+  font-size: 0.72rem;
+  color: #c8a860;
   letter-spacing: 0.1em;
 }
 
@@ -189,335 +199,331 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1px;
+  gap: 0px;
 }
 .timer-label {
-  font-size: 0.55rem;
-  color: #c8b07a;
-  letter-spacing: 0.15em;
+  font-size: 0.52rem;
+  color: #c8a860;
+  letter-spacing: 0.18em;
   font-family: 'Noto Sans JP', sans-serif;
 }
 .timer-value {
-  font-size: 1.7rem;
+  font-size: 1.65rem;
   font-weight: 700;
-  color: #f0e0a0;
+  color: #f2e4a5;
   letter-spacing: 0.1em;
   font-family: 'Noto Sans JP', sans-serif;
-  line-height: 1;
+  line-height: 1.1;
 }
 .timer-display.stopped .timer-value {
-  color: rgba(240,224,160,0.55);
+  color: rgba(242,228,165,0.45);
 }
 
 .flip-hint {
-  font-size: 0.72rem;
-  color: #c8b07a;
+  font-size: 0.7rem;
+  color: #c8a860;
   font-family: 'Noto Sans JP', sans-serif;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   animation: blink 1.8s ease-in-out infinite;
 }
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
-}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
 
 .btn {
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  padding: 8px 22px;
-  border-radius: 5px;
+  padding: 7px 20px;
+  border-radius: 4px;
   border: none;
   cursor: pointer;
-  transition: all 0.18s ease;
-  letter-spacing: 0.06em;
+  transition: all 0.17s ease;
+  letter-spacing: 0.07em;
 }
 .btn-start {
-  background: #1a3a6b;
+  background: linear-gradient(160deg, #1e448a, #122e6a);
   color: #f0e8d0;
-  border: 1px solid #2a5090;
-  box-shadow: 0 2px 10px rgba(26,58,107,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+  border: 1px solid #2a52a0;
+  box-shadow: 0 2px 12px rgba(18,46,106,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
 }
-.btn-start:hover { background: #22498a; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,58,107,0.6); }
+.btn-start:hover { background: linear-gradient(160deg, #2654a8, #1a3880); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(18,46,106,0.7); }
 .btn-start:active { transform: translateY(0); }
 
 .btn-stop {
-  background: #7a1a1a;
-  color: #f5e8e0;
-  border: 1px solid #a02020;
-  box-shadow: 0 2px 10px rgba(122,26,26,0.5), inset 0 1px 0 rgba(255,255,255,0.1);
+  background: linear-gradient(160deg, #8a1e1e, #6a1212);
+  color: #f5ece0;
+  border: 1px solid #a02828;
+  box-shadow: 0 2px 12px rgba(106,18,18,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
 }
-.btn-stop:hover { background: #9a2020; transform: translateY(-1px); box-shadow: 0 4px 14px rgba(122,26,26,0.6); }
+.btn-stop:hover { background: linear-gradient(160deg, #a82626, #801a1a); transform: translateY(-1px); }
 .btn-stop:active { transform: translateY(0); }
 
 .btn-reset {
-  background: rgba(50,35,18,0.7);
-  color: #c8b07a;
-  border: 1px solid rgba(200,160,80,0.4);
+  background: rgba(40,25,10,0.65);
+  color: #c8a860;
+  border: 1px solid rgba(210,170,80,0.35);
 }
-.btn-reset:hover { background: rgba(70,50,25,0.8); transform: translateY(-1px); }
+.btn-reset:hover { background: rgba(60,38,14,0.75); transform: translateY(-1px); }
 
-/* ======================================
-   BOARD AREA
-   ====================================== */
+/* ===========================================
+   BOARD MAIN
+   =========================================== */
 
 .board-main {
   flex: 1;
-  padding: 14px 12px;
+  padding: 12px 10px 16px;
   overflow-x: auto;
 }
 
 .board-area {
-  min-width: 720px;
-  max-width: 1200px;
+  min-width: 700px;
+  max-width: 1240px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  /* 3cm gap between fields → represented as a larger gap here */
+  gap: 0;
 }
 
-/* ======================================
-   FIELD SECTION
-   ====================================== */
+/* ===========================================
+   FIELD WRAP — side label + rows
+   =========================================== */
 
-.field-section {
-  background: rgba(20,12,4,0.22);
-  border-radius: 6px;
-  padding: 8px 10px 10px;
-  border: 1px solid rgba(180,140,60,0.2);
+.field-wrap {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  /* subtle field background stripe */
+  background: rgba(0,0,0,0.12);
+  border-radius: 4px;
+  padding: 6px 0 6px 4px;
+  border: 1px solid rgba(0,0,0,0.14);
 }
 
-.field-label-row {
+/* Vertical field name on the left */
+.field-name-vertical {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  border-left: 3px solid;
+  padding: 4px 4px 4px 5px;
+  background: rgba(0,0,0,0.15);
+  border-radius: 2px 0 0 2px;
+  margin-right: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
+  justify-content: center;
 }
 
-.field-label {
-  font-family: 'Noto Serif JP', serif;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  border-left: 3px solid;
-  padding: 1px 8px;
-  background: rgba(0,0,0,0.15);
-  border-radius: 2px;
-}
-
-.field-subtitle {
-  font-size: 0.65rem;
-  color: rgba(220,200,150,0.6);
-  font-family: 'Noto Sans JP', sans-serif;
-}
-
-/* ======================================
-   CARD ROWS — 3 rows per field
-   ====================================== */
+/* ===========================================
+   ROWS INSIDE A FIELD
+   =========================================== */
 
 .field-rows {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  /* 1cm gap between rows — use a smaller rem value */
   gap: 5px;
+  min-width: 0;
 }
 
-.card-row {
+/* Each row = cards + right label */
+.row-wrap {
   display: flex;
-  gap: 4px;
-  justify-content: flex-start;
+  align-items: center;
+  gap: 0;
 }
 
-/* ======================================
+/* The actual cards in a row */
+.card-row {
+  flex: 1;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  min-width: 0;
+  /* Fixed height so 3 rows + gaps fit on screen */
+  height: 118px;
+}
+
+/* Row label box on the right */
+.row-label-box {
+  flex-shrink: 0;
+  width: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+
+.row-label {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: rgba(230,210,150,0.75);
+  letter-spacing: 0.12em;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  white-space: nowrap;
+}
+
+/* ===========================================
    KARUTA CARD
-   ====================================== */
+   =========================================== */
 
 .karuta-card {
-  /* portrait card — real karuta aspect ratio ~1:2.4 */
-  width: calc((100% - 4px * 8) / 9);
-  aspect-ratio: 5 / 12;
-  min-width: 54px;
-  max-width: 90px;
-  perspective: 500px;
-  flex-shrink: 0;
+  height: 118px;
+  flex: 1;
+  min-width: 0;
   position: relative;
+  perspective: 600px;
 }
 
 .karuta-card.can-flip {
   cursor: pointer;
 }
 
-.karuta-card.can-flip:hover .card-inner {
-  transform: rotateY(10deg);
-  box-shadow: 4px 4px 16px rgba(0,0,0,0.45);
-}
-
 .card-inner {
   width: 100%;
-  height: 100%;
+  height: 118px;
   position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.45s ease, box-shadow 0.2s ease;
-  border-radius: 3px;
-  box-shadow: 2px 3px 8px rgba(0,0,0,0.4);
+  border-radius: 2px;
+  box-shadow: 1px 2px 6px rgba(0,0,0,0.45);
+  transition: box-shadow 0.22s ease, transform 0.22s ease;
 }
 
-.face-up .card-inner {
-  transform: rotateY(0deg);
-}
-
-.face-down .card-inner {
-  transform: rotateY(180deg);
-}
-
-.karuta-card.can-flip.face-down:hover .card-inner {
-  transform: rotateY(170deg);
-}
-
-/* ---- Card Front (取り札) ---- */
+/* ---- Card faces: stacked, toggled by opacity ---- */
 .card-front,
 .card-back {
   position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  border-radius: 3px;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 2px;
   overflow: hidden;
+  transition: opacity 0.35s ease;
 }
 
+/* Face-up state */
+.face-up   .card-front { opacity: 1; z-index: 2; }
+.face-up   .card-back  { opacity: 0; z-index: 1; }
+/* Face-down state */
+.face-down .card-front { opacity: 0; z-index: 1; }
+.face-down .card-back  { opacity: 1; z-index: 2; }
+
+/* Hover peek: face-down card shows a hint of flip */
+.karuta-card.can-flip:hover .card-inner {
+  transform: translateY(-2px);
+}
+
+/* Front face — ivory paper look */
 .card-front {
-  background: #faf6ec;
-  border: 1px solid #d4b882;
+  background: linear-gradient(170deg, #fefbf2 0%, #f8f0dc 60%, #ede2c4 100%);
+  border: 1px solid #c8a460;
+  box-shadow: inset 0 3px 0 #c63030;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 5px 3px 14px;
-  /* subtle paper texture gradient */
-  background-image: linear-gradient(160deg, #fefaf2 0%, #f5eedc 60%, #ece2c8 100%);
-}
-
-.card-front-content {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  overflow: hidden;
+  padding: 6px 3px 8px;
 }
 
 .card-text {
   font-family: 'Noto Serif JP', serif;
-  font-size: clamp(0.44rem, 0.95vw, 0.72rem);
-  line-height: 1.65;
-  color: #1a0f02;
+  font-size: clamp(0.36rem, 0.82vw, 0.62rem);
+  line-height: 1.72;
+  color: #190e02;
   writing-mode: vertical-rl;
   text-orientation: mixed;
   letter-spacing: 0.08em;
-  max-height: 100%;
   overflow: hidden;
   word-break: keep-all;
   text-align: center;
-  /* simulate slightly brushed look */
-  text-shadow: 0 0 1px rgba(0,0,0,0.12);
+  flex: 1;
+  max-height: 100%;
 }
 
-.card-id {
+.card-no {
   position: absolute;
-  bottom: 3px;
-  right: 3px;
-  font-size: 0.34rem;
+  bottom: 2px;
+  right: 2px;
+  font-size: 0.28rem;
   color: #a08050;
   font-family: 'Noto Sans JP', sans-serif;
-  opacity: 0.65;
+  opacity: 0.55;
 }
 
-/* ---- Card Back ---- */
+/* Back face — deep navy with faint pattern */
 .card-back {
-  background: #1a2e5a;
-  border: 1px solid #0e1e42;
-  transform: rotateY(180deg);
+  background: linear-gradient(170deg, #1c3268 0%, #0e1c44 60%, #182a5c 100%);
+  border: 1px solid #0a1430;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  background-image:
-    linear-gradient(135deg, #1a2e5a 0%, #0f1e40 50%, #1a2e5a 100%),
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 9px);
 }
 
-.card-back-kanji {
+.card-back-mon {
   font-family: 'Noto Serif JP', serif;
-  font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+  font-size: clamp(1rem, 2vw, 1.6rem);
   font-weight: 700;
-  color: rgba(200,175,100,0.5);
-  letter-spacing: 0.05em;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  color: rgba(210,185,100,0.28);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+  letter-spacing: 0.04em;
 }
 
-.card-back-sub {
-  font-family: 'Noto Serif JP', serif;
-  font-size: clamp(0.3rem, 0.6vw, 0.45rem);
-  color: rgba(200,175,100,0.3);
-  letter-spacing: 0.15em;
-  writing-mode: vertical-rl;
-}
+/* ===========================================
+   CENTER GAP between fields  (≈3cm)
+   =========================================== */
 
-/* ======================================
-   CENTER DIVIDER
-   ====================================== */
-
-.center-divider {
+.center-gap {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 3px 0;
+  padding: 10px 0;
 }
-.divider-line {
+.center-line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(200,175,100,0.35), transparent);
+  background: linear-gradient(90deg, transparent, rgba(210,185,100,0.3), transparent);
 }
-.divider-label {
+.center-text {
   font-family: 'Noto Serif JP', serif;
-  font-size: 0.65rem;
-  color: rgba(220,200,150,0.5);
-  letter-spacing: 0.25em;
+  font-size: 0.62rem;
+  color: rgba(230,205,140,0.45);
+  letter-spacing: 0.28em;
   white-space: nowrap;
 }
 
-/* ======================================
-   MEMO OVERLAY
-   ====================================== */
+/* ===========================================
+   MEMO TOAST
+   =========================================== */
 
-.memo-overlay {
+.memo-toast {
   position: fixed;
-  bottom: 20px;
+  bottom: 18px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(26,16,8,0.85);
-  color: #f0e0a0;
-  border: 1px solid rgba(200,175,100,0.4);
+  background: rgba(15,8,2,0.88);
+  color: #ead595;
+  border: 1px solid rgba(210,170,80,0.4);
   padding: 8px 28px;
   border-radius: 999px;
   font-family: 'Noto Sans JP', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   font-weight: 500;
   letter-spacing: 0.08em;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 22px rgba(0,0,0,0.55);
   pointer-events: none;
   animation: pulse 2.2s ease-in-out infinite;
+  z-index: 50;
 }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.65; }
-}
-
-/* ======================================
-   UTILITY LAYER
-   ====================================== */
+/* ===========================================
+   UTILITY LAYER (shadcn compat)
+   =========================================== */
 @layer utilities {
   input[type="search"]::-webkit-search-cancel-button { @apply hidden; }
   [contenteditable][data-placeholder]:empty::before {
@@ -527,32 +533,27 @@
   }
   .no-default-hover-elevate {}
   .no-default-active-elevate {}
-
-  .toggle-elevate::before, .toggle-elevate-2::before {
-    content: ""; pointer-events: none; position: absolute;
-    inset: 0px; border-radius: inherit; z-index: -1;
+  .toggle-elevate::before,.toggle-elevate-2::before {
+    content:"";pointer-events:none;position:absolute;inset:0px;border-radius:inherit;z-index:-1;
   }
-  .toggle-elevate.toggle-elevated::before { background-color: var(--elevate-2); }
-  .border.toggle-elevate::before { inset: -1px; }
-
+  .toggle-elevate.toggle-elevated::before{background-color:var(--elevate-2);}
+  .border.toggle-elevate::before{inset:-1px;}
   .hover-elevate:not(.no-default-hover-elevate),
   .active-elevate:not(.no-default-active-elevate),
   .hover-elevate-2:not(.no-default-hover-elevate),
-  .active-elevate-2:not(.no-default-active-elevate) { position: relative; z-index: 0; }
-
+  .active-elevate-2:not(.no-default-active-elevate){position:relative;z-index:0;}
   .hover-elevate:not(.no-default-hover-elevate)::after,
   .active-elevate:not(.no-default-active-elevate)::after,
   .hover-elevate-2:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:not(.no-default-active-elevate)::after {
-    content: ""; pointer-events: none; position: absolute;
-    inset: 0px; border-radius: inherit; z-index: 999;
+  .active-elevate-2:not(.no-default-active-elevate)::after{
+    content:"";pointer-events:none;position:absolute;inset:0px;border-radius:inherit;z-index:999;
   }
   .hover-elevate:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-1); }
+  .active-elevate:active:not(.no-default-active-elevate)::after{background-color:var(--elevate-1);}
   .hover-elevate-2:hover:not(.no-default-hover-elevate)::after,
-  .active-elevate-2:active:not(.no-default-active-elevate)::after { background-color: var(--elevate-2); }
+  .active-elevate-2:active:not(.no-default-active-elevate)::after{background-color:var(--elevate-2);}
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after,
   .border.active-elevate:not(.no-active-interaction-elevate)::after,
   .border.hover-elevate-2:not(.no-hover-interaction-elevate)::after,
-  .border.active-elevate-2:not(.no-active-interaction-elevate)::after { inset: -1px; }
+  .border.active-elevate-2:not(.no-active-interaction-elevate)::after{inset:-1px;}
 }
