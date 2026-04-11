@@ -467,7 +467,10 @@ export default function KarutaBoard() {
                   <div
                     key={cIdx}
                     className={`card-slot ${cardId !== null ? "filled" : "empty"} ${
-                      selectedCard !== null && cardId === null && (isEditable || (field === "op" && opGrid.flat().includes(selectedCard!))) ? "droppable" : ""
+                      selectedCard !== null && cardId === null && (
+                        (field === "op" && opGrid.flat().includes(selectedCard!)) ||
+                        (field === "my" && !opGrid.flat().includes(selectedCard!) && isEditable)
+                      ) ? "droppable" : ""
                     } ${isDragTarget && cardId === null ? "drag-droppable" : ""}`}
                     onClick={() => {
                       if (field === "op") {
