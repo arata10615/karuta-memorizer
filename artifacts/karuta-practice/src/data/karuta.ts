@@ -107,12 +107,25 @@ export const ALL_CARDS: KarutaCard[] = [
   { id: 100, shimoNoKu: "なほあまりある 昔なりけり", shimoHiragana: "なほあまりある むかしなりけり" },
 ];
 
-// 自陣: 1〜48番の48枚（3段×16枚）
-export const MY_CARD_IDS = Array.from({ length: 48 }, (_, i) => i + 1);
+export const MY_CARD_IDS = [
+  1, 3, 5, 7, 9,
+  11, 13, 15, 17, 19,
+  21, 23, 25, 27, 29,
+  31, 33, 35, 37, 39,
+  41, 43, 45, 47, 49,
+];
 
-export const OPPONENT_CARD_IDS: number[] = [];
+export const OPPONENT_CARD_IDS = [
+  2, 4, 6, 8, 10,
+  12, 14, 16, 18, 20,
+  22, 24, 26, 28, 30,
+  32, 34, 36, 38, 40,
+  42, 44, 46, 48, 50,
+];
 
-export const ROW_SIZES = [16, 16, 16];
+export const OPPONENT_ROW_SIZES = [9, 8, 8];
+export const SELF_COLS = 16;
+export const SELF_ROWS = 3;
 
 export function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];
