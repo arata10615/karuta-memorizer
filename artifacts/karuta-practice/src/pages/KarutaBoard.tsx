@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ALL_CARDS,
   MY_CARD_IDS,
-  OPPONENT_CARD_IDS,
   ROW_SIZES,
-  shuffleArray,
   splitIntoRows,
 } from "@/data/karuta";
 
@@ -15,25 +13,19 @@ interface BoardCard {
   faceUp: boolean;
 }
 
-const OPPONENT_ROW_LABELS = ["下段", "中段", "上段"];
 const MY_ROW_LABELS = ["上段", "中段", "下段"];
 
 export default function KarutaBoard() {
   const [gameState, setGameState] = useState<GameState>("setup");
   const [elapsed, setElapsed] = useState(0);
   const [myRows, setMyRows] = useState<BoardCard[][]>([]);
-  const [opponentRows, setOpponentRows] = useState<BoardCard[][]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const initBoard = useCallback(() => {
     const myRowsData = splitIntoRows([...MY_CARD_IDS], ROW_SIZES).map((row) =>
       row.map((id) => ({ cardId: id, faceUp: true }))
     );
-    const opRowsData = splitIntoRows(shuffleArray([...OPPONENT_CARD_IDS]), ROW_SIZES).map((row) =>
-      row.map((id) => ({ cardId: id, faceUp: true }))
-    );
     setMyRows(myRowsData);
-    setOpponentRows(opRowsData);
     setElapsed(0);
     setGameState("setup");
   }, []);
@@ -50,17 +42,15 @@ export default function KarutaBoard() {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     setGameState("stopped");
     setMyRows((prev) => prev.map((row) => row.map((c) => ({ ...c, faceUp: false }))));
-    setOpponentRows((prev) => prev.map((row) => row.map((c) => ({ ...c, faceUp: false }))));
   };
 
   const toggleMyCard = (r: number, ci: number) => {
     if (gameState !== "stopped") return;
-    setMyRows((prev) => prev.map((row, ri) => row.map((c, i) => ri === r && i === ci ? { ...c, faceUp: !c.faceUp } : c)));
-  };
-
-  const toggleOpCard = (r: number, ci: number) => {
-    if (gameState !== "stopped") return;
-    setOpponentRows((prev) => prev.map((row, ri) => row.map((c, i) => ri === r && i === ci ? { ...c, faceUp: !c.faceUp } : c)));
+    setMyRows((prev) =>
+      prev.map((row, ri) =>
+        row.map((c, i) => (ri === r && i === ci ? { ...c, faceUp: !c.faceUp } : c))
+      )
+    );
   };
 
   const reset = () => {
@@ -78,72 +68,12 @@ export default function KarutaBoard() {
 
   const getCard = (id: number) => ALL_CARDS.find((c) => c.id === id)!;
 
-  const renderCard = (
-    card: BoardCard,
-    field: string,
-    rowIdx: number,
-    colIdx: number,
-    onToggle: (r: number, c: number) => void
-  ) => {
-    const karuta = getCard(card.cardId);
-    const canFlip = gameState === "stopped";
-    return (
-      <div
-        key={card.cardId}
-        className={`karuta-card ${card.faceUp ? "face-up" : "face-down"} ${canFlip ? "can-flip" : ""}`}
-        onClick={() => canFlip && onToggle(rowIdx, colIdx)}
-        data-testid={`card-${field}-${card.cardId}`}
-        title={card.faceUp ? karuta.shimoHiragana : "タップで確認"}
-      >
-        <div className="card-inner">
-          <div className="card-front">
-            <span className="card-text">{karuta.shimoHiragana}</span>
-            <span className="card-no">No.{karuta.id}</span>
-          </div>
-          <div className="card-back">
-            <span className="card-back-mon">百</span>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderField = (
-    rows: BoardCard[][],
-    field: "my" | "opponent",
-    rowLabels: string[],
-    onToggle: (r: number, c: number) => void,
-    fieldLabel: string,
-    accentColor: string
-  ) => (
-    <div className="field-wrap">
-      <div
-        className="field-name-vertical"
-        style={{ color: accentColor, borderColor: accentColor }}
-      >
-        {fieldLabel}
-      </div>
-      <div className="field-rows" data-testid={`grid-${field}`}>
-        {rows.map((row, rIdx) => (
-          <div key={rIdx} className="row-wrap">
-            <div className="card-row">
-              {row.map((card, cIdx) => renderCard(card, field, rIdx, cIdx, onToggle))}
-            </div>
-            <div className="row-label-box">
-              <span className="row-label">{rowLabels[rIdx]}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
   return (
     <div className="app-root">
       <header className="app-header">
         <div className="header-left">
           <h1 className="app-title">競技かるた</h1>
-          <span className="app-subtitle">暗記練習</span>
+          <span className="app-subtitle">暗記練習　自陣</span>
         </div>
         <div className="header-controls">
           {gameState === "setup" && (
@@ -178,12 +108,46 @@ export default function KarutaBoard() {
       </header>
 
       <main className="board-main">
-        <div className="board-area">
-          {renderField(opponentRows, "opponent", OPPONENT_ROW_LABELS, toggleOpCard, "相手陣", "#8b1a1a")}
-          <div className="center-gap">
-            <div className="center-line" /><span className="center-text">— 中陣 —</span><div className="center-line" />
+        <div className="board-area" data-testid="grid-my">
+          <div className="field-wrap">
+            <div className="field-name-vertical" style={{ color: "#1a3a6b", borderColor: "#1a3a6b" }}>
+              自　陣
+            </div>
+            <div className="field-rows">
+              {myRows.map((row, rIdx) => (
+                <div key={rIdx} className="row-wrap">
+                  <div className="card-row">
+                    {row.map((card, cIdx) => {
+                      const karuta = getCard(card.cardId);
+                      const canFlip = gameState === "stopped";
+                      return (
+                        <div
+                          key={card.cardId}
+                          className={`karuta-card ${card.faceUp ? "face-up" : "face-down"} ${canFlip ? "can-flip" : ""}`}
+                          onClick={() => canFlip && toggleMyCard(rIdx, cIdx)}
+                          data-testid={`card-my-${card.cardId}`}
+                          title={card.faceUp ? karuta.shimoHiragana : "タップで確認"}
+                        >
+                          <div className="card-inner">
+                            <div className="card-front">
+                              <span className="card-text">{karuta.shimoHiragana}</span>
+                              <span className="card-no">No.{karuta.id}</span>
+                            </div>
+                            <div className="card-back">
+                              <span className="card-back-mon">百</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="row-label-box">
+                    <span className="row-label">{MY_ROW_LABELS[rIdx]}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          {renderField(myRows, "my", MY_ROW_LABELS, toggleMyCard, "自陣", "#1a3a6b")}
         </div>
       </main>
 

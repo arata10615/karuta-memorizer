@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Yuji+Syuku&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -396,66 +396,76 @@
   transition: box-shadow 0.22s ease, transform 0.22s ease;
 }
 
-/* ---- Card faces: stacked, toggled by opacity ---- */
+/* ---- Card faces ---- */
 .card-front,
 .card-back {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 118px;
   border-radius: 2px;
   overflow: hidden;
-  transition: opacity 0.35s ease;
+  transition: opacity 0.3s ease;
+  /* Stack both faces on top of each other */
+  position: absolute;
+  top: 0; left: 0;
 }
 
-/* Face-up state */
-.face-up   .card-front { opacity: 1; z-index: 2; }
-.face-up   .card-back  { opacity: 0; z-index: 1; }
-/* Face-down state */
-.face-down .card-front { opacity: 0; z-index: 1; }
-.face-down .card-back  { opacity: 1; z-index: 2; }
+/* Face-up: show front */
+.face-up   .card-front { opacity: 1; }
+.face-up   .card-back  { opacity: 0; pointer-events: none; }
+/* Face-down: show back */
+.face-down .card-front { opacity: 0; pointer-events: none; }
+.face-down .card-back  { opacity: 1; }
 
-/* Hover peek: face-down card shows a hint of flip */
+/* Hover lift for clickable cards */
 .karuta-card.can-flip:hover .card-inner {
   transform: translateY(-2px);
 }
 
-/* Front face — ivory paper look */
+/* Front face — 大石天狗堂風 白/生成り地 */
 .card-front {
-  background: linear-gradient(170deg, #fefbf2 0%, #f8f0dc 60%, #ede2c4 100%);
-  border: 1px solid #c8a460;
-  box-shadow: inset 0 3px 0 #c63030;
+  /* 白地に薄い生成りのグラデーション */
+  background: linear-gradient(175deg, #ffffff 0%, #faf7f0 50%, #f5efdf 100%);
+  border: 1px solid #c0a050;
+  /* 上部に朱色の帯 — 天狗堂のような装飾 */
+  box-shadow: inset 0 4px 0 #b82020;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 6px 3px 8px;
+  justify-content: flex-start;
+  padding: 10px 2px 6px;
+  position: relative;
 }
 
+/* 大石天狗堂風: 大きく太い書道体ひらがな */
 .card-text {
-  font-family: 'Noto Serif JP', serif;
-  font-size: clamp(0.36rem, 0.82vw, 0.62rem);
-  line-height: 1.72;
-  color: #190e02;
+  font-family: 'Yuji Syuku', 'Noto Serif JP', serif;
+  /* カード幅に合わせてクランプ */
+  font-size: clamp(0.46rem, 1.1vw, 0.78rem);
+  line-height: 1.55;
+  color: #0d0702;
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   overflow: hidden;
   word-break: keep-all;
   text-align: center;
   flex: 1;
   max-height: 100%;
+  /* 天狗堂風: 若干太く見せる */
+  -webkit-text-stroke: 0.4px rgba(0,0,0,0.18);
 }
 
 .card-no {
   position: absolute;
   bottom: 2px;
   right: 2px;
-  font-size: 0.28rem;
-  color: #a08050;
+  font-size: 0.26rem;
+  color: #907040;
   font-family: 'Noto Sans JP', sans-serif;
   opacity: 0.55;
 }
 
-/* Back face — deep navy with faint pattern */
+/* Back face — deep navy */
 .card-back {
   background: linear-gradient(170deg, #1c3268 0%, #0e1c44 60%, #182a5c 100%);
   border: 1px solid #0a1430;
