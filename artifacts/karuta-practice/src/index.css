@@ -346,8 +346,7 @@
   align-items: stretch;
   gap: 2px;
   min-width: 0;
-  /* Fixed height so 3 rows + gaps fit on screen */
-  height: 118px;
+  height: 92px;
 }
 
 /* Row label box on the right */
@@ -376,7 +375,7 @@
    =========================================== */
 
 .karuta-card {
-  height: 118px;
+  height: 92px;
   flex: 1;
   min-width: 0;
   position: relative;
@@ -389,7 +388,7 @@
 
 .card-inner {
   width: 100%;
-  height: 118px;
+  height: 92px;
   position: relative;
   border-radius: 2px;
   box-shadow: 1px 2px 6px rgba(0,0,0,0.45);
@@ -400,7 +399,7 @@
 .card-front,
 .card-back {
   width: 100%;
-  height: 118px;
+  height: 92px;
   border-radius: 2px;
   overflow: hidden;
   transition: opacity 0.3s ease;
@@ -427,12 +426,12 @@
   background: linear-gradient(175deg, #ffffff 0%, #faf7f0 50%, #f5efdf 100%);
   border: 1px solid #c0a050;
   /* 上部に朱色の帯 — 天狗堂のような装飾 */
-  box-shadow: inset 0 4px 0 #b82020;
+  box-shadow: inset 0 3px 0 #b82020;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 10px 2px 6px;
+  padding: 6px 1px 4px;
   position: relative;
 }
 
@@ -497,7 +496,7 @@
 .card-slot {
   flex: 1;
   min-width: 0;
-  height: 118px;
+  height: 92px;
   position: relative;
 }
 

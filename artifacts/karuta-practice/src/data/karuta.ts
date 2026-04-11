@@ -131,12 +131,17 @@ export function placeCardsInGrid(cardIds: number[]): (number | null)[][] {
   const grid: (number | null)[][] = Array.from({ length: GRID_ROWS }, () =>
     Array.from({ length: GRID_COLS }, () => null)
   );
-  const rowCounts = [7, 8, 10];
+  const rowCounts = [10, 8, 7];
   let idx = 0;
   for (let r = 0; r < GRID_ROWS; r++) {
     const count = rowCounts[r];
-    for (let c = 0; c < count && idx < shuffled.length; c++) {
+    const leftCount = Math.ceil(count / 2);
+    const rightCount = count - leftCount;
+    for (let c = 0; c < leftCount && idx < shuffled.length; c++) {
       grid[r][c] = shuffled[idx++];
+    }
+    for (let c = 0; c < rightCount && idx < shuffled.length; c++) {
+      grid[r][GRID_COLS - 1 - c] = shuffled[idx++];
     }
   }
   return grid;
