@@ -292,9 +292,42 @@ export default function KarutaBoard() {
 
   const handleOpCardClick = (cardId: number) => {
     if (didDrag.current) return;
+    if (gameState === "placing") {
+      setSelectedCard((prev) => (prev === cardId ? null : cardId));
+      return;
+    }
     if (gameState === "stopped") {
       setFaceUpMap((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
     }
+  };
+
+  const handleOpSlotClick = (row: number, col: number) => {
+    if (gameState !== "placing" || didDrag.current) return;
+    if (selectedCard === null) return;
+    const isOpCard = opGrid.flat().includes(selectedCard);
+    if (!isOpCard) return;
+
+    const existing = opGrid[row][col];
+    if (existing !== null) {
+      setOpGrid((prev) => {
+        const g = prev.map((r) => [...r]);
+        for (let r = 0; r < GRID_ROWS; r++)
+          for (let c = 0; c < GRID_COLS; c++)
+            if (g[r][c] === selectedCard) g[r][c] = existing;
+        g[row][col] = selectedCard;
+        return g;
+      });
+    } else {
+      setOpGrid((prev) => {
+        const g = prev.map((r) => [...r]);
+        for (let r = 0; r < GRID_ROWS; r++)
+          for (let c = 0; c < GRID_COLS; c++)
+            if (g[r][c] === selectedCard) g[r][c] = null;
+        g[row][col] = selectedCard;
+        return g;
+      });
+    }
+    setSelectedCard(null);
   };
 
   const autoPlace = async () => {
@@ -433,9 +466,15 @@ export default function KarutaBoard() {
                   <div
                     key={cIdx}
                     className={`card-slot ${cardId !== null ? "filled" : "empty"} ${
-                      selectedCard !== null && cardId === null && isEditable ? "droppable" : ""
+                      selectedCard !== null && cardId === null && (isEditable || (field === "op" && opGrid.flat().includes(selectedCard!))) ? "droppable" : ""
                     } ${isDragTarget && cardId === null ? "drag-droppable" : ""}`}
-                    onClick={() => isEditable && cardId === null ? handleSlotClick(rIdx, cIdx) : undefined}
+                    onClick={() => {
+                      if (field === "op") {
+                        handleOpSlotClick(rIdx, cIdx);
+                      } else if (isEditable) {
+                        handleSlotClick(rIdx, cIdx);
+                      }
+                    }}
                     data-grid-slot="1"
                     data-field={field}
                     data-row={rIdx}
