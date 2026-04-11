@@ -40,6 +40,7 @@ export default function KarutaBoard() {
   const [gameState, setGameState] = useState<GameState>("placing");
   const [elapsed, setElapsed] = useState(0);
   const [reviewElapsed, setReviewElapsed] = useState(0);
+  const [reviewRunning, setReviewRunning] = useState(false);
   const [opGrid, setOpGrid] = useState<Grid>(createEmptyGrid);
   const [selfGrid, setSelfGrid] = useState<Grid>(createEmptyGrid);
   const [handCards, setHandCards] = useState<number[]>([]);
@@ -322,6 +323,7 @@ export default function KarutaBoard() {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     setGameState("stopped");
     setReviewElapsed(0);
+    setReviewRunning(true);
     reviewIntervalRef.current = setInterval(() => setReviewElapsed((p) => p + 1), 1000);
     const allDown: Record<number, boolean> = {};
     [...selfGrid.flat(), ...opGrid.flat()].forEach((id) => {
@@ -499,6 +501,12 @@ export default function KarutaBoard() {
                 <span className="timer-label">回答時間</span>
                 <span className="timer-value">{formatTime(reviewElapsed)}</span>
               </div>
+              {reviewRunning && (
+                <button className="btn btn-stop" onClick={() => {
+                  if (reviewIntervalRef.current) { clearInterval(reviewIntervalRef.current); reviewIntervalRef.current = null; }
+                  setReviewRunning(false);
+                }}>ストップ</button>
+              )}
               <span className="flip-hint">タップして確認</span>
               <button className="btn btn-reset" onClick={resetBoard}>リセット</button>
             </>
