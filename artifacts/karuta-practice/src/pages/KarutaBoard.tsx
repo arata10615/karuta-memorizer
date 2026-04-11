@@ -295,7 +295,7 @@ export default function KarutaBoard() {
   };
 
   const autoPlace = async () => {
-    const rowCounts = [10, 8, 7];
+    const rowCounts = [7, 8, 10];
     const newGrid = await smartAutoPlace(
       handCards,
       selfGrid,
