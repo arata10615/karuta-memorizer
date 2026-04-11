@@ -583,6 +583,18 @@
   letter-spacing: 0.06em;
 }
 
+.learn-badge {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.68rem;
+  color: #a0d890;
+  background: rgba(40,80,30,0.5);
+  border: 1px solid rgba(120,200,100,0.3);
+  border-radius: 12px;
+  padding: 3px 10px;
+  cursor: default;
+  user-select: none;
+}
+
 .btn-auto {
   background: rgba(30,60,40,0.7);
   color: #b8d8a0;

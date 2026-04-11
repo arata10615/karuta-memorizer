@@ -7,6 +7,12 @@ import {
   placeCardsInGrid,
   splitTextIntoColumns,
 } from "@/data/karuta";
+import {
+  recordPlacement,
+  smartAutoPlace,
+  getSessionCount,
+  clearMemory,
+} from "@/data/placementMemory";
 
 type GameState = "placing" | "memorizing" | "stopped";
 type Grid = (number | null)[][];
@@ -296,32 +302,22 @@ export default function KarutaBoard() {
   };
 
   const autoPlace = () => {
-    const remaining = [...handCards];
-    const g = selfGrid.map((r) => [...r]);
     const rowCounts = [10, 8, 7];
-    for (let r = GRID_ROWS - 1; r >= 0 && remaining.length > 0; r--) {
-      let placed = g[r].filter((c) => c !== null).length;
-      for (let c = 0; c < GRID_COLS && remaining.length > 0 && placed < rowCounts[r]; c++) {
-        if (g[r][c] === null) {
-          g[r][c] = remaining.shift()!;
-          placed++;
-        }
-      }
-    }
-    for (let r = 0; r < GRID_ROWS && remaining.length > 0; r++) {
-      for (let c = 0; c < GRID_COLS && remaining.length > 0; c++) {
-        if (g[r][c] === null) {
-          g[r][c] = remaining.shift()!;
-        }
-      }
-    }
-    setSelfGrid(g);
-    setHandCards(remaining);
+    const newGrid = smartAutoPlace(
+      handCards,
+      selfGrid,
+      GRID_ROWS,
+      GRID_COLS,
+      rowCounts
+    );
+    setSelfGrid(newGrid);
+    setHandCards([]);
     setSelectedCard(null);
   };
 
   const startMemorizing = () => {
     if (!allPlaced) return;
+    recordPlacement(selfGrid);
     setGameState("memorizing");
     setElapsed(0);
     intervalRef.current = setInterval(() => setElapsed((p) => p + 1), 1000);
@@ -465,9 +461,14 @@ export default function KarutaBoard() {
           {gameState === "placing" && (
             <>
               <span className="place-counter">{placedCount}/{myCardCount.current}枚配置済み</span>
+              <span className="learn-badge" title="学習データをクリアするにはダブルクリック" onDoubleClick={() => { clearMemory(); alert("学習データをクリアしました"); }}>
+                🧠 学習: {getSessionCount()}回
+              </span>
               <button className="btn btn-reset" onClick={resetBoard}>リセット</button>
               {handCards.length > 0 && (
-                <button className="btn btn-auto" onClick={autoPlace}>自動配置</button>
+                <button className="btn btn-auto" onClick={autoPlace}>
+                  {getSessionCount() > 0 ? "学習配置" : "自動配置"}
+                </button>
               )}
               <button
                 className={`btn btn-start ${!allPlaced ? "btn-disabled" : ""}`}
