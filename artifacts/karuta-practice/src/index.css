@@ -218,6 +218,12 @@
 .timer-display.stopped .timer-value {
   color: rgba(242,228,165,0.45);
 }
+.timer-display.review .timer-value {
+  color: #a5d6f2;
+}
+.timer-display.review .timer-label {
+  color: #7bb8d4;
+}
 
 .flip-hint {
   font-size: 0.7rem;

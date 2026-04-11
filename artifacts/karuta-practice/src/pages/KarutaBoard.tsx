@@ -39,6 +39,7 @@ interface DragState {
 export default function KarutaBoard() {
   const [gameState, setGameState] = useState<GameState>("placing");
   const [elapsed, setElapsed] = useState(0);
+  const [reviewElapsed, setReviewElapsed] = useState(0);
   const [opGrid, setOpGrid] = useState<Grid>(createEmptyGrid);
   const [selfGrid, setSelfGrid] = useState<Grid>(createEmptyGrid);
   const [handCards, setHandCards] = useState<number[]>([]);
@@ -46,6 +47,7 @@ export default function KarutaBoard() {
   const [faceUpMap, setFaceUpMap] = useState<Record<number, boolean>>({});
   const [dragState, setDragState] = useState<DragState | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reviewIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const didDrag = useRef(false);
   const pressStart = useRef<{ x: number; y: number } | null>(null);
@@ -319,6 +321,8 @@ export default function KarutaBoard() {
   const stopMemorizing = () => {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
     setGameState("stopped");
+    setReviewElapsed(0);
+    reviewIntervalRef.current = setInterval(() => setReviewElapsed((p) => p + 1), 1000);
     const allDown: Record<number, boolean> = {};
     [...selfGrid.flat(), ...opGrid.flat()].forEach((id) => {
       if (id !== null) allDown[id] = false;
@@ -328,6 +332,7 @@ export default function KarutaBoard() {
 
   const resetBoard = () => {
     if (intervalRef.current) { clearInterval(intervalRef.current); intervalRef.current = null; }
+    if (reviewIntervalRef.current) { clearInterval(reviewIntervalRef.current); reviewIntervalRef.current = null; }
     cancelLongPress();
     if (cleanupDragListeners.current) cleanupDragListeners.current();
     dragRef.current = null;
@@ -336,6 +341,7 @@ export default function KarutaBoard() {
 
   useEffect(() => () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (reviewIntervalRef.current) clearInterval(reviewIntervalRef.current);
     cancelLongPress();
     if (cleanupDragListeners.current) cleanupDragListeners.current();
   }, []);
@@ -488,6 +494,10 @@ export default function KarutaBoard() {
               <div className="timer-display stopped">
                 <span className="timer-label">暗記時間</span>
                 <span className="timer-value">{formatTime(elapsed)}</span>
+              </div>
+              <div className="timer-display review">
+                <span className="timer-label">回答時間</span>
+                <span className="timer-value">{formatTime(reviewElapsed)}</span>
               </div>
               <span className="flip-hint">タップして確認</span>
               <button className="btn btn-reset" onClick={resetBoard}>リセット</button>
