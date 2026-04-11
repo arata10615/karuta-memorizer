@@ -1,57 +1,42 @@
-const STORAGE_KEY = "karuta_placement_memory";
+const API_BASE = "/api";
 
-interface PositionFrequency {
-  [posKey: string]: number;
-}
+let cachedModel: Record<number, Record<string, number>> | null = null;
 
-interface PlacementData {
-  cardPositions: { [cardId: number]: PositionFrequency };
-  totalSessions: number;
-}
-
-function loadData(): PlacementData {
+export async function recordPlacement(grid: (number | null)[][]) {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return { cardPositions: {}, totalSessions: 0 };
-}
-
-function saveData(data: PlacementData) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-export function recordPlacement(grid: (number | null)[][]) {
-  const data = loadData();
-  data.totalSessions++;
-
-  for (let r = 0; r < grid.length; r++) {
-    for (let c = 0; c < grid[r].length; c++) {
-      const cardId = grid[r][c];
-      if (cardId === null) continue;
-      const key = `${r},${c}`;
-      if (!data.cardPositions[cardId]) {
-        data.cardPositions[cardId] = {};
-      }
-      data.cardPositions[cardId][key] = (data.cardPositions[cardId][key] || 0) + 1;
-    }
+    await fetch(`${API_BASE}/placements`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ grid }),
+    });
+    cachedModel = null;
+  } catch (err) {
+    console.error("Failed to record placement:", err);
   }
-
-  saveData(data);
 }
 
-export function getSessionCount(): number {
-  return loadData().totalSessions;
+async function fetchModel(): Promise<Record<number, Record<string, number>>> {
+  if (cachedModel) return cachedModel;
+  try {
+    const res = await fetch(`${API_BASE}/placements/model`);
+    const data = await res.json();
+    const model: Record<number, Record<string, number>> = data.model || {};
+    cachedModel = model;
+    return model;
+  } catch (err) {
+    console.error("Failed to fetch placement model:", err);
+    return {};
+  }
 }
 
-export function smartAutoPlace(
+export async function smartAutoPlace(
   cardIds: number[],
   existingGrid: (number | null)[][],
   gridRows: number,
   gridCols: number,
   rowCounts: number[]
-): (number | null)[][] {
-  const data = loadData();
+): Promise<(number | null)[][]> {
+  const model = await fetchModel();
   const grid = existingGrid.map((r) => [...r]);
 
   const alreadyPlaced = new Set<number>();
@@ -68,28 +53,26 @@ export function smartAutoPlace(
   const remaining = cardIds.filter((id) => !alreadyPlaced.has(id));
   if (remaining.length === 0) return grid;
 
-  const availableSlots: { r: number; c: number }[] = [];
-  for (let r = 0; r < gridRows; r++) {
-    const currentRowCount = grid[r].filter((c) => c !== null).length;
-    const maxForRow = rowCounts[r] || gridCols;
-    for (let c = 0; c < gridCols; c++) {
-      if (grid[r][c] === null && currentRowCount < maxForRow && !occupiedSlots.has(`${r},${c}`)) {
-        availableSlots.push({ r, c });
-      }
-    }
-  }
+  const hasData = Object.keys(model).length > 0;
 
-  const hasHistory = data.totalSessions > 0;
-
-  if (!hasHistory) {
+  if (!hasData) {
     return fallbackPlace(remaining, grid, gridRows, gridCols, rowCounts);
   }
 
   type Assignment = { cardId: number; r: number; c: number; score: number };
   const candidates: Assignment[] = [];
 
+  const availableSlots: { r: number; c: number }[] = [];
+  for (let r = 0; r < gridRows; r++) {
+    for (let c = 0; c < gridCols; c++) {
+      if (grid[r][c] === null) {
+        availableSlots.push({ r, c });
+      }
+    }
+  }
+
   for (const cardId of remaining) {
-    const prefs = data.cardPositions[cardId];
+    const prefs = model[cardId];
     if (!prefs) {
       for (const slot of availableSlots) {
         candidates.push({ cardId, r: slot.r, c: slot.c, score: 0 });
@@ -106,9 +89,6 @@ export function smartAutoPlace(
         .filter(([k]) => k.startsWith(`${slot.r},`))
         .reduce((sum, [, v]) => sum + v, 0);
 
-      const exactScore = totalForCard > 0 ? freq / totalForCard : 0;
-      const rowScore = totalForCard > 0 ? rowFreq / totalForCard : 0;
-
       const colDist = Object.entries(prefs).reduce((best, [k, v]) => {
         const [, pc] = k.split(",").map(Number);
         const dist = Math.abs(pc - slot.c);
@@ -116,6 +96,9 @@ export function smartAutoPlace(
         return Math.min(best, dist * (1 - weight));
       }, gridCols);
       const proximityScore = 1 - colDist / gridCols;
+
+      const exactScore = totalForCard > 0 ? freq / totalForCard : 0;
+      const rowScore = totalForCard > 0 ? rowFreq / totalForCard : 0;
 
       const score = exactScore * 5 + rowScore * 2 + proximityScore * 1;
       candidates.push({ cardId, r: slot.r, c: slot.c, score });
@@ -180,8 +163,4 @@ function fallbackPlace(
     }
   }
   return grid;
-}
-
-export function clearMemory() {
-  localStorage.removeItem(STORAGE_KEY);
 }

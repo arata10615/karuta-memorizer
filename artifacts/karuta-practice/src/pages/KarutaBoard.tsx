@@ -10,8 +10,6 @@ import {
 import {
   recordPlacement,
   smartAutoPlace,
-  getSessionCount,
-  clearMemory,
 } from "@/data/placementMemory";
 
 type GameState = "placing" | "memorizing" | "stopped";
@@ -301,9 +299,9 @@ export default function KarutaBoard() {
     }
   };
 
-  const autoPlace = () => {
+  const autoPlace = async () => {
     const rowCounts = [10, 8, 7];
-    const newGrid = smartAutoPlace(
+    const newGrid = await smartAutoPlace(
       handCards,
       selfGrid,
       GRID_ROWS,
@@ -461,14 +459,9 @@ export default function KarutaBoard() {
           {gameState === "placing" && (
             <>
               <span className="place-counter">{placedCount}/{myCardCount.current}枚配置済み</span>
-              <span className="learn-badge" title="学習データをクリアするにはダブルクリック" onDoubleClick={() => { clearMemory(); alert("学習データをクリアしました"); }}>
-                🧠 学習: {getSessionCount()}回
-              </span>
               <button className="btn btn-reset" onClick={resetBoard}>リセット</button>
               {handCards.length > 0 && (
-                <button className="btn btn-auto" onClick={autoPlace}>
-                  {getSessionCount() > 0 ? "学習配置" : "自動配置"}
-                </button>
+                <button className="btn btn-auto" onClick={autoPlace}>自動配置</button>
               )}
               <button
                 className={`btn btn-start ${!allPlaced ? "btn-disabled" : ""}`}
