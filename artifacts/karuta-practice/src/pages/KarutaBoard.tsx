@@ -498,7 +498,7 @@ export default function KarutaBoard() {
 
       <main className="board-main">
         <div className="board-area">
-          {renderGrid(opGrid, "op", OPPONENT_ROW_LABELS, "相手陣", "#8b1a1a", false, true)}
+          {renderGrid(opGrid, "op", OPPONENT_ROW_LABELS, "相手陣", "#8b1a1a", false, false)}
 
           <div className="center-gap">
             <div className="center-line" />
