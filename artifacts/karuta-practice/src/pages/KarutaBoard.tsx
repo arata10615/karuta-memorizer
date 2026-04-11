@@ -11,6 +11,7 @@ import {
 
 type GameState = "placing" | "memorizing" | "stopped";
 type Grid = (number | null)[][];
+type FieldType = "my" | "op";
 
 const OPPONENT_ROW_LABELS = ["下段", "中段", "上段"];
 const MY_ROW_LABELS = ["上段", "中段", "下段"];
@@ -25,6 +26,7 @@ function createEmptyGrid(): Grid {
 interface DragState {
   cardId: number;
   sourceType: "grid" | "hand";
+  sourceField?: FieldType;
   sourceRow?: number;
   sourceCol?: number;
   x: number;
@@ -80,6 +82,7 @@ export default function KarutaBoard() {
     e: React.MouseEvent | React.TouchEvent,
     cardId: number,
     sourceType: "grid" | "hand",
+    sourceField?: FieldType,
     sourceRow?: number,
     sourceCol?: number
   ) => {
@@ -90,7 +93,7 @@ export default function KarutaBoard() {
     cancelLongPress();
     longPressTimer.current = setTimeout(() => {
       didDrag.current = true;
-      setDragState({ cardId, sourceType, sourceRow, sourceCol, x: pos.x, y: pos.y });
+      setDragState({ cardId, sourceType, sourceField, sourceRow, sourceCol, x: pos.x, y: pos.y });
     }, LONG_PRESS_MS);
   };
 
@@ -102,16 +105,20 @@ export default function KarutaBoard() {
     setDragState((prev) => prev ? { ...prev, x: pos.x, y: pos.y } : null);
   }, [dragState]);
 
-  const findSlotAt = (x: number, y: number): { row: number; col: number } | null => {
+  const findSlotAt = (x: number, y: number): { field: FieldType; row: number; col: number } | null => {
     const el = document.elementFromPoint(x, y);
     if (!el) return null;
-    const slot = el.closest("[data-self-slot]");
+    const slot = el.closest("[data-grid-slot]");
     if (!slot) return null;
+    const field = slot.getAttribute("data-field") as FieldType | null;
     const row = parseInt(slot.getAttribute("data-row") || "", 10);
     const col = parseInt(slot.getAttribute("data-col") || "", 10);
-    if (isNaN(row) || isNaN(col)) return null;
-    return { row, col };
+    if (!field || isNaN(row) || isNaN(col)) return null;
+    return { field, row, col };
   };
+
+  const getGridSetter = (field: FieldType) => field === "my" ? setSelfGrid : setOpGrid;
+  const getGrid = (field: FieldType) => field === "my" ? selfGrid : opGrid;
 
   const onPointerUp = useCallback((e: MouseEvent | TouchEvent) => {
     cancelLongPress();
@@ -122,32 +129,34 @@ export default function KarutaBoard() {
 
     const target = findSlotAt(pos.x, pos.y);
     if (target) {
-      const { row, col } = target;
-      const existing = selfGrid[row][col];
+      const { field: targetField, row, col } = target;
+      const targetGrid = targetField === "my" ? selfGrid : opGrid;
+      const existing = targetGrid[row][col];
 
       if (dragState.sourceType === "hand") {
-        if (existing === null) {
-          setSelfGrid((prev) => {
-            const g = prev.map((r) => [...r]);
-            g[row][col] = dragState.cardId;
-            return g;
-          });
-          setHandCards((prev) => prev.filter((c) => c !== dragState.cardId));
-        } else if (existing !== dragState.cardId) {
-          setSelfGrid((prev) => {
-            const g = prev.map((r) => [...r]);
-            g[row][col] = dragState.cardId;
-            return g;
-          });
-          setHandCards((prev) => [...prev.filter((c) => c !== dragState.cardId), existing]);
+        if (targetField === "my") {
+          if (existing === null) {
+            setSelfGrid((prev) => {
+              const g = prev.map((r) => [...r]);
+              g[row][col] = dragState.cardId;
+              return g;
+            });
+            setHandCards((prev) => prev.filter((c) => c !== dragState.cardId));
+          } else if (existing !== dragState.cardId) {
+            setSelfGrid((prev) => {
+              const g = prev.map((r) => [...r]);
+              g[row][col] = dragState.cardId;
+              return g;
+            });
+            setHandCards((prev) => [...prev.filter((c) => c !== dragState.cardId), existing]);
+          }
         }
-      } else {
+      } else if (dragState.sourceField === targetField) {
         const sr = dragState.sourceRow!;
         const sc = dragState.sourceCol!;
-        if (sr === row && sc === col) {
-          // dropped on same slot
-        } else {
-          setSelfGrid((prev) => {
+        if (sr !== row || sc !== col) {
+          const setter = getGridSetter(targetField);
+          setter((prev) => {
             const g = prev.map((r) => [...r]);
             g[sr][sc] = existing;
             g[row][col] = dragState.cardId;
@@ -159,7 +168,7 @@ export default function KarutaBoard() {
 
     setDragState(null);
     setSelectedCard(null);
-  }, [dragState, selfGrid, handCards]);
+  }, [dragState, selfGrid, opGrid, handCards]);
 
   useEffect(() => {
     if (!dragState) return;
@@ -277,6 +286,7 @@ export default function KarutaBoard() {
   };
 
   const handleOpCardClick = (cardId: number) => {
+    if (didDrag.current) return;
     if (gameState === "stopped") {
       setFaceUpMap((prev) => ({ ...prev, [cardId]: !prev[cardId] }));
     }
@@ -365,22 +375,23 @@ export default function KarutaBoard() {
     );
   };
 
-  const renderCardInSlot = (cardId: number, field: "my" | "op", canFlip: boolean, row?: number, col?: number) => {
+  const renderCardInSlot = (cardId: number, field: FieldType, canFlip: boolean, row: number, col: number) => {
     const isSelected = selectedCard === cardId;
     const isDragging = dragState?.cardId === cardId;
+    const canDrag = gameState === "placing";
     return (
       <div
         className={`karuta-card ${isFaceUp(cardId) ? "face-up" : "face-down"} ${canFlip ? "can-flip" : ""} ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""}`}
         onClick={() => field === "my" ? handleGridCardClick(cardId) : handleOpCardClick(cardId)}
         onMouseDown={(e) => {
-          if (field === "my" && gameState === "placing") {
-            startLongPress(e, cardId, "grid", row, col);
+          if (canDrag) {
+            startLongPress(e, cardId, "grid", field, row, col);
             attachPreDragListeners();
           }
         }}
         onTouchStart={(e) => {
-          if (field === "my" && gameState === "placing") {
-            startLongPress(e, cardId, "grid", row, col);
+          if (canDrag) {
+            startLongPress(e, cardId, "grid", field, row, col);
           }
         }}
         onTouchMove={() => cancelLongPress()}
@@ -392,41 +403,50 @@ export default function KarutaBoard() {
 
   const renderGrid = (
     grid: Grid,
-    field: "my" | "op",
+    field: FieldType,
     rowLabels: string[],
     fieldLabel: string,
     accentColor: string,
     isEditable: boolean
-  ) => (
-    <div className="field-wrap">
-      <div className="field-name-vertical" style={{ color: accentColor, borderColor: accentColor }}>
-        {fieldLabel}
-      </div>
-      <div className="field-rows">
-        {grid.map((row, rIdx) => (
-          <div key={rIdx} className="row-wrap">
-            <div className="card-row grid-row">
-              {row.map((cardId, cIdx) => (
-                <div
-                  key={cIdx}
-                  className={`card-slot ${cardId !== null ? "filled" : "empty"} ${
-                    selectedCard !== null && cardId === null && isEditable ? "droppable" : ""
-                  } ${dragState && cardId === null && field === "my" ? "drag-droppable" : ""}`}
-                  onClick={() => isEditable && cardId === null ? handleSlotClick(rIdx, cIdx) : undefined}
-                  {...(field === "my" ? { "data-self-slot": "1", "data-row": rIdx, "data-col": cIdx } : {})}
-                >
-                  {cardId !== null && renderCardInSlot(cardId, field, gameState === "stopped", rIdx, cIdx)}
-                </div>
-              ))}
+  ) => {
+    const isDragTarget = dragState !== null && (
+      (dragState.sourceType === "hand" && field === "my") ||
+      (dragState.sourceType === "grid" && dragState.sourceField === field)
+    );
+    return (
+      <div className="field-wrap">
+        <div className="field-name-vertical" style={{ color: accentColor, borderColor: accentColor }}>
+          {fieldLabel}
+        </div>
+        <div className="field-rows">
+          {grid.map((row, rIdx) => (
+            <div key={rIdx} className="row-wrap">
+              <div className="card-row grid-row">
+                {row.map((cardId, cIdx) => (
+                  <div
+                    key={cIdx}
+                    className={`card-slot ${cardId !== null ? "filled" : "empty"} ${
+                      selectedCard !== null && cardId === null && isEditable ? "droppable" : ""
+                    } ${isDragTarget && cardId === null ? "drag-droppable" : ""}`}
+                    onClick={() => isEditable && cardId === null ? handleSlotClick(rIdx, cIdx) : undefined}
+                    data-grid-slot="1"
+                    data-field={field}
+                    data-row={rIdx}
+                    data-col={cIdx}
+                  >
+                    {cardId !== null && renderCardInSlot(cardId, field, gameState === "stopped", rIdx, cIdx)}
+                  </div>
+                ))}
+              </div>
+              <div className="row-label-box">
+                <span className="row-label">{rowLabels[rIdx]}</span>
+              </div>
             </div>
-            <div className="row-label-box">
-              <span className="row-label">{rowLabels[rIdx]}</span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   const dragCard = dragState ? getCard(dragState.cardId) : null;
   const dragCols = dragCard ? splitTextIntoColumns(dragCard.shimoHiragana) : [];
