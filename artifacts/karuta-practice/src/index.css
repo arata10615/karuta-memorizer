@@ -505,6 +505,10 @@
   flex: initial;
 }
 
+.card-slot .karuta-card.opponent-card {
+  transform: rotate(180deg);
+}
+
 .card-slot.empty {
   border: 1px dashed rgba(200,175,100,0.2);
   border-radius: 2px;

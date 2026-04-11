@@ -380,7 +380,7 @@ export default function KarutaBoard() {
     const canDrag = gameState === "placing";
     return (
       <div
-        className={`karuta-card ${isFaceUp(cardId) ? "face-up" : "face-down"} ${canFlip ? "can-flip" : ""} ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""}`}
+        className={`karuta-card ${isFaceUp(cardId) ? "face-up" : "face-down"} ${canFlip ? "can-flip" : ""} ${isSelected ? "selected" : ""} ${isDragging ? "dragging" : ""} ${field === "op" ? "opponent-card" : ""}`}
         onClick={() => field === "my" ? handleGridCardClick(cardId) : handleOpCardClick(cardId)}
         onMouseDown={(e) => {
           if (canDrag) startDrag(e, cardId, "grid", field, row, col);
