@@ -386,6 +386,9 @@
   min-width: 0;
   position: relative;
   perspective: 600px;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 
 .karuta-card.can-flip {

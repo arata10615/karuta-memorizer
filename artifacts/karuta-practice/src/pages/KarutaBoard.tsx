@@ -222,6 +222,7 @@ export default function KarutaBoard() {
 
   const handleSlotClick = (row: number, col: number) => {
     if (gameState !== "placing" || didDrag.current) return;
+    if (selectedCard !== null && opGrid.flat().includes(selectedCard)) return;
     const existing = selfGrid[row][col];
 
     if (existing !== null) {
