@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ALL_CARDS,
-  MY_CARD_IDS,
-  OPPONENT_CARD_IDS,
+  dealRandomCards,
   GRID_COLS,
   GRID_ROWS,
   placeCardsInGrid,
@@ -38,7 +37,7 @@ export default function KarutaBoard() {
   const [elapsed, setElapsed] = useState(0);
   const [opGrid, setOpGrid] = useState<Grid>(createEmptyGrid);
   const [selfGrid, setSelfGrid] = useState<Grid>(createEmptyGrid);
-  const [handCards, setHandCards] = useState<number[]>([...MY_CARD_IDS]);
+  const [handCards, setHandCards] = useState<number[]>([]);
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [faceUpMap, setFaceUpMap] = useState<Record<number, boolean>>({});
   const [dragState, setDragState] = useState<DragState | null>(null);
@@ -47,10 +46,14 @@ export default function KarutaBoard() {
   const didDrag = useRef(false);
   const pressStart = useRef<{ x: number; y: number } | null>(null);
 
+  const myCardCount = useRef(25);
+
   const initBoard = useCallback(() => {
-    setOpGrid(placeCardsInGrid(OPPONENT_CARD_IDS));
+    const { myCards, opCards } = dealRandomCards();
+    myCardCount.current = myCards.length;
+    setOpGrid(placeCardsInGrid(opCards));
     setSelfGrid(createEmptyGrid());
-    setHandCards([...MY_CARD_IDS]);
+    setHandCards([...myCards]);
     setSelectedCard(null);
     setElapsed(0);
     setGameState("placing");
@@ -61,7 +64,7 @@ export default function KarutaBoard() {
   useEffect(() => { initBoard(); }, [initBoard]);
 
   const placedCount = selfGrid.flat().filter((c) => c !== null).length;
-  const allPlaced = placedCount === MY_CARD_IDS.length;
+  const allPlaced = placedCount === myCardCount.current;
 
   const cancelLongPress = () => {
     if (longPressTimer.current) {
@@ -461,7 +464,8 @@ export default function KarutaBoard() {
         <div className="header-controls">
           {gameState === "placing" && (
             <>
-              <span className="place-counter">{placedCount}/{MY_CARD_IDS.length}枚配置済み</span>
+              <span className="place-counter">{placedCount}/{myCardCount.current}枚配置済み</span>
+              <button className="btn btn-reset" onClick={resetBoard}>リセット</button>
               {handCards.length > 0 && (
                 <button className="btn btn-auto" onClick={autoPlace}>自動配置</button>
               )}

@@ -107,21 +107,15 @@ export const ALL_CARDS: KarutaCard[] = [
   { id: 100, shimoNoKu: "なほあまりある 昔なりけり", shimoHiragana: "なほあまりある むかしなりけり" },
 ];
 
-export const MY_CARD_IDS = [
-  1, 3, 5, 7, 9,
-  11, 13, 15, 17, 19,
-  21, 23, 25, 27, 29,
-  31, 33, 35, 37, 39,
-  41, 43, 45, 47, 49,
-];
-
-export const OPPONENT_CARD_IDS = [
-  2, 4, 6, 8, 10,
-  12, 14, 16, 18, 20,
-  22, 24, 26, 28, 30,
-  32, 34, 36, 38, 40,
-  42, 44, 46, 48, 50,
-];
+export function dealRandomCards(): { myCards: number[]; opCards: number[] } {
+  const allIds = ALL_CARDS.map((c) => c.id);
+  const shuffled = shuffleArray(allIds);
+  const selected = shuffled.slice(0, 50);
+  return {
+    myCards: selected.slice(0, 25),
+    opCards: selected.slice(25, 50),
+  };
+}
 
 export const GRID_COLS = 16;
 export const GRID_ROWS = 3;
