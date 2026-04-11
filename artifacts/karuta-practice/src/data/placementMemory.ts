@@ -126,13 +126,7 @@ export async function smartAutoPlace(
 
   const stillRemaining = remaining.filter((id) => !assignedCards.has(id));
   if (stillRemaining.length > 0) {
-    for (let r = 0; r < gridRows && stillRemaining.length > 0; r++) {
-      for (let c = 0; c < gridCols && stillRemaining.length > 0; c++) {
-        if (grid[r][c] === null) {
-          grid[r][c] = stillRemaining.shift()!;
-        }
-      }
-    }
+    return fallbackPlace(stillRemaining, grid, gridRows, gridCols, rowCounts);
   }
 
   return grid;
@@ -146,19 +140,27 @@ function fallbackPlace(
   rowCounts: number[]
 ): (number | null)[][] {
   const cards = [...remaining];
-  for (let r = gridRows - 1; r >= 0 && cards.length > 0; r--) {
-    let placed = grid[r].filter((c) => c !== null).length;
-    for (let c = 0; c < gridCols && cards.length > 0 && placed < rowCounts[r]; c++) {
+  for (let r = 0; r < gridRows && cards.length > 0; r++) {
+    const existing = grid[r].filter((c) => c !== null).length;
+    const maxForRow = rowCounts[r] || gridCols;
+    const need = Math.min(maxForRow - existing, cards.length);
+    if (need <= 0) continue;
+
+    const leftCount = Math.ceil(need / 2);
+    const rightCount = need - leftCount;
+
+    let placed = 0;
+    for (let c = 0; c < gridCols && placed < leftCount; c++) {
       if (grid[r][c] === null) {
         grid[r][c] = cards.shift()!;
         placed++;
       }
     }
-  }
-  for (let r = 0; r < gridRows && cards.length > 0; r++) {
-    for (let c = 0; c < gridCols && cards.length > 0; c++) {
-      if (grid[r][c] === null) {
-        grid[r][c] = cards.shift()!;
+    placed = 0;
+    for (let c = 0; c < gridCols && placed < rightCount; c++) {
+      if (grid[r][gridCols - 1 - c] === null) {
+        grid[r][gridCols - 1 - c] = cards.shift()!;
+        placed++;
       }
     }
   }
