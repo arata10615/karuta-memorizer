@@ -1,50 +1,40 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   ALL_CARDS,
-  MY_FIELD_POSITIONS,
+  MY_CARD_IDS,
   OPPONENT_CARD_IDS,
+  ROW_SIZES,
   shuffleArray,
-  type CardPlacement,
+  splitIntoRows,
 } from "@/data/karuta";
 
 type GameState = "setup" | "memorizing" | "stopped";
 
-interface PlacedCard {
+interface BoardCard {
   cardId: number;
-  row: number;
-  col: number;
   faceUp: boolean;
 }
-
-const COLS = 5;
-const ROWS = 5;
 
 export default function KarutaBoard() {
   const [gameState, setGameState] = useState<GameState>("setup");
   const [elapsed, setElapsed] = useState(0);
-  const [myCards, setMyCards] = useState<PlacedCard[]>([]);
-  const [opponentCards, setOpponentCards] = useState<PlacedCard[]>([]);
+  const [myRows, setMyRows] = useState<BoardCard[][]>([]);
+  const [opponentRows, setOpponentRows] = useState<BoardCard[][]>([]);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const initBoard = useCallback(() => {
-    const myPlaced: PlacedCard[] = MY_FIELD_POSITIONS.map((p) => ({
-      cardId: p.cardId,
-      row: p.row,
-      col: p.col,
-      faceUp: true,
-    }));
+    const myShuffled = [...MY_CARD_IDS];
+    const myRowsData = splitIntoRows(myShuffled, ROW_SIZES).map((row) =>
+      row.map((id) => ({ cardId: id, faceUp: true }))
+    );
 
-    const opponentPositions = shufflePositions(ROWS, COLS);
-    const shuffledOpponent = shuffleArray(OPPONENT_CARD_IDS);
-    const opPlaced: PlacedCard[] = shuffledOpponent.map((cardId, i) => ({
-      cardId,
-      row: opponentPositions[i].row,
-      col: opponentPositions[i].col,
-      faceUp: true,
-    }));
+    const opShuffled = shuffleArray([...OPPONENT_CARD_IDS]);
+    const opRowsData = splitIntoRows(opShuffled, ROW_SIZES).map((row) =>
+      row.map((id) => ({ cardId: id, faceUp: true }))
+    );
 
-    setMyCards(myPlaced);
-    setOpponentCards(opPlaced);
+    setMyRows(myRowsData);
+    setOpponentRows(opRowsData);
     setElapsed(0);
     setGameState("setup");
   }, []);
@@ -52,16 +42,6 @@ export default function KarutaBoard() {
   useEffect(() => {
     initBoard();
   }, [initBoard]);
-
-  function shufflePositions(rows: number, cols: number): { row: number; col: number }[] {
-    const positions: { row: number; col: number }[] = [];
-    for (let r = 0; r < rows; r++) {
-      for (let c = 0; c < cols; c++) {
-        positions.push({ row: r, col: c });
-      }
-    }
-    return shuffleArray(positions).slice(0, 25);
-  }
 
   const startMemorizing = () => {
     setGameState("memorizing");
@@ -77,21 +57,34 @@ export default function KarutaBoard() {
       intervalRef.current = null;
     }
     setGameState("stopped");
-    setMyCards((prev) => prev.map((c) => ({ ...c, faceUp: false })));
-    setOpponentCards((prev) => prev.map((c) => ({ ...c, faceUp: false })));
+    setMyRows((prev) =>
+      prev.map((row) => row.map((c) => ({ ...c, faceUp: false })))
+    );
+    setOpponentRows((prev) =>
+      prev.map((row) => row.map((c) => ({ ...c, faceUp: false })))
+    );
   };
 
-  const toggleCard = (field: "my" | "opponent", cardId: number) => {
+  const toggleMyCard = (rowIdx: number, colIdx: number) => {
     if (gameState !== "stopped") return;
-    if (field === "my") {
-      setMyCards((prev) =>
-        prev.map((c) => (c.cardId === cardId ? { ...c, faceUp: !c.faceUp } : c))
-      );
-    } else {
-      setOpponentCards((prev) =>
-        prev.map((c) => (c.cardId === cardId ? { ...c, faceUp: !c.faceUp } : c))
-      );
-    }
+    setMyRows((prev) =>
+      prev.map((row, r) =>
+        row.map((c, ci) =>
+          r === rowIdx && ci === colIdx ? { ...c, faceUp: !c.faceUp } : c
+        )
+      )
+    );
+  };
+
+  const toggleOpponentCard = (rowIdx: number, colIdx: number) => {
+    if (gameState !== "stopped") return;
+    setOpponentRows((prev) =>
+      prev.map((row, r) =>
+        row.map((c, ci) =>
+          r === rowIdx && ci === colIdx ? { ...c, faceUp: !c.faceUp } : c
+        )
+      )
+    );
   };
 
   const reset = () => {
@@ -114,75 +107,66 @@ export default function KarutaBoard() {
     return `${m}:${s}`;
   };
 
-  const getCard = (cardId: number) => ALL_CARDS.find((c) => c.id === cardId)!;
+  const getCard = (id: number) => ALL_CARDS.find((c) => c.id === id)!;
 
-  const renderGrid = (
-    cards: PlacedCard[],
+  const renderField = (
+    rows: BoardCard[][],
     field: "my" | "opponent",
+    onToggle: (r: number, c: number) => void,
     label: string,
-    labelColor: string
-  ) => {
-    const grid: (PlacedCard | null)[][] = Array.from({ length: ROWS }, () =>
-      Array(COLS).fill(null)
-    );
-    cards.forEach((c) => {
-      if (c.row < ROWS && c.col < COLS) {
-        grid[c.row][c.col] = c;
-      }
-    });
-
-    return (
-      <div className="field-section">
-        <div
-          className="field-label"
-          style={{ color: labelColor, borderColor: labelColor }}
-          data-testid={`label-${field}`}
-        >
+    accent: string
+  ) => (
+    <div className="field-section">
+      <div className="field-label-row">
+        <span className="field-label" style={{ borderColor: accent, color: accent }}>
           {label}
-        </div>
-        <div className="karuta-grid" data-testid={`grid-${field}`}>
-          {grid.map((row, rIdx) =>
-            row.map((card, cIdx) => {
-              if (!card) {
-                return (
-                  <div
-                    key={`empty-${rIdx}-${cIdx}`}
-                    className="card-slot empty-slot"
-                  />
-                );
-              }
-              const karutaCard = getCard(card.cardId);
+        </span>
+        <span className="field-subtitle">
+          {rows.reduce((sum, r) => sum + r.length, 0)}枚
+        </span>
+      </div>
+      <div className="field-rows" data-testid={`grid-${field}`}>
+        {rows.map((row, rIdx) => (
+          <div key={rIdx} className="card-row">
+            {row.map((card, cIdx) => {
+              const karuta = getCard(card.cardId);
+              const canClick = gameState === "stopped";
               return (
                 <div
                   key={card.cardId}
-                  className={`card-slot karuta-card ${card.faceUp ? "face-up" : "face-down"} ${gameState === "stopped" ? "clickable" : ""}`}
-                  onClick={() => toggleCard(field, card.cardId)}
+                  className={`karuta-card ${card.faceUp ? "face-up" : "face-down"} ${canClick ? "can-flip" : ""}`}
+                  onClick={() => canClick && onToggle(rIdx, cIdx)}
                   data-testid={`card-${field}-${card.cardId}`}
-                  title={card.faceUp ? karutaCard.shimoNoKu : "裏向き"}
                 >
                   <div className="card-inner">
                     <div className="card-front">
-                      <span className="card-text">{karutaCard.shimoNoKu}</span>
-                      <span className="card-number">No.{karutaCard.id}</span>
+                      <div className="card-front-content">
+                        <span className="card-text">{karuta.shimoHiragana}</span>
+                      </div>
+                      <span className="card-id">No.{karuta.id}</span>
                     </div>
                     <div className="card-back">
-                      <span className="card-back-pattern">百</span>
+                      <span className="card-back-kanji">百</span>
+                      <span className="card-back-sub">人一首</span>
                     </div>
                   </div>
                 </div>
               );
-            })
-          )}
-        </div>
+            })}
+          </div>
+        ))}
       </div>
-    );
-  };
+    </div>
+  );
 
   return (
-    <div className="app-container">
+    <div className="app-root">
       <header className="app-header">
-        <h1 className="app-title">競技かるた 暗記練習</h1>
-        <div className="controls">
+        <div className="header-left">
+          <h1 className="app-title">競技かるた</h1>
+          <span className="app-subtitle">暗記練習</span>
+        </div>
+        <div className="header-controls">
           {gameState === "setup" && (
             <button
               className="btn btn-start"
@@ -194,8 +178,9 @@ export default function KarutaBoard() {
           )}
           {gameState === "memorizing" && (
             <>
-              <div className="timer" data-testid="timer-display">
-                {formatTime(elapsed)}
+              <div className="timer-display" data-testid="timer-display">
+                <span className="timer-label">暗記中</span>
+                <span className="timer-value">{formatTime(elapsed)}</span>
               </div>
               <button
                 className="btn btn-stop"
@@ -208,12 +193,13 @@ export default function KarutaBoard() {
           )}
           {gameState === "stopped" && (
             <>
-              <div className="timer stopped" data-testid="timer-final">
-                {formatTime(elapsed)}
+              <div className="timer-display stopped" data-testid="timer-final">
+                <span className="timer-label">暗記時間</span>
+                <span className="timer-value">{formatTime(elapsed)}</span>
               </div>
-              <div className="hint-text" data-testid="hint-flip">
-                札をタップして確認できます
-              </div>
+              <span className="flip-hint" data-testid="hint-flip">
+                タップして確認
+              </span>
               <button
                 className="btn btn-reset"
                 onClick={reset}
@@ -226,19 +212,33 @@ export default function KarutaBoard() {
         </div>
       </header>
 
-      <main className="board-container">
-        <div className="board-wrapper">
-          {renderGrid(opponentCards, "opponent", "相手陣地", "#c0392b")}
-          <div className="field-divider">
-            <span className="divider-text">── 中陣 ──</span>
+      <main className="board-main">
+        <div className="board-area">
+          {renderField(
+            opponentRows,
+            "opponent",
+            toggleOpponentCard,
+            "相手陣地",
+            "#8b1a1a"
+          )}
+          <div className="center-divider">
+            <div className="divider-line" />
+            <span className="divider-label">中　陣</span>
+            <div className="divider-line" />
           </div>
-          {renderGrid(myCards, "my", "自陣", "#1a5276")}
+          {renderField(
+            myRows,
+            "my",
+            toggleMyCard,
+            "自陣",
+            "#1a3a6b"
+          )}
         </div>
       </main>
 
       {gameState === "memorizing" && (
-        <div className="memo-banner" data-testid="banner-memorizing">
-          暗記中... 札の位置を覚えてください
+        <div className="memo-overlay" data-testid="banner-memorizing">
+          札の位置を覚えてください
         </div>
       )}
     </div>
