@@ -736,57 +736,60 @@
    =========================================== */
 @media (max-height: 500px) and (orientation: landscape) {
   .app-root {
-    height: auto;
-    min-height: auto;
-    overflow-y: auto;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
   .app-header {
-    padding: 4px 10px;
+    padding: 1px 8px;
     min-height: auto;
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    flex-shrink: 0;
   }
-  .app-title { font-size: 1rem; }
-  .app-subtitle { font-size: 0.5rem; }
-  .btn { font-size: 0.7rem; padding: 5px 14px; }
-  .btn-auto { font-size: 0.7rem; padding: 5px 10px; }
-  .place-counter { font-size: 0.65rem; }
-  .timer-value { font-size: 1.1rem; }
-  .timer-label { font-size: 0.42rem; }
+  .app-title { font-size: 0.8rem; }
+  .app-subtitle { font-size: 0.38rem; }
+  .btn { font-size: 0.55rem; padding: 2px 8px; }
+  .btn-auto { font-size: 0.55rem; padding: 2px 6px; }
+  .place-counter { font-size: 0.5rem; }
+  .timer-value { font-size: 0.8rem; }
+  .timer-label { font-size: 0.34rem; }
 
   .board-main {
-    padding: 6px 8px;
+    padding: 1px 4px;
     overflow-x: auto;
-    flex: none;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
   }
   .board-area {
-    min-width: 600px;
+    min-width: 500px;
   }
   .field-wrap {
-    padding: 4px 0 4px 4px;
+    padding: 1px 0 1px 2px;
   }
   .field-name-vertical {
-    font-size: 0.55rem;
-    padding: 2px 3px 2px 4px;
-    border-left-width: 2.5px;
+    font-size: 0.36rem;
+    padding: 1px 1px 1px 2px;
+    border-left-width: 2px;
+    margin-right: 3px;
   }
   .field-rows {
-    gap: 3px;
+    gap: 1px;
   }
   .card-row {
-    height: 11vw;
+    height: 5.5vw;
   }
   .karuta-card {
-    height: 11vw;
+    height: 5.5vw;
   }
   .card-inner,
   .card-front,
   .card-back {
-    height: 11vw;
+    height: 5.5vw;
   }
   .card-front {
-    padding: 1px 0 0;
+    padding: 0;
     border-width: 1px;
     justify-content: center;
   }
@@ -795,57 +798,57 @@
     align-items: center;
   }
   .card-col {
-    font-size: clamp(0.24rem, 1.4vw, 0.5rem);
-    line-height: 1.05;
-    letter-spacing: -0.03em;
+    font-size: clamp(0.18rem, 0.7vw, 0.36rem);
+    line-height: 1.0;
+    letter-spacing: -0.04em;
     flex-shrink: 1;
   }
   .card-no {
     display: none;
   }
   .card-slot.empty {
-    min-height: 11vw;
+    min-height: 5.5vw;
   }
   .row-label-box {
-    width: 22px;
-    padding: 0 2px;
+    width: 14px;
+    padding: 0 1px;
   }
   .row-label {
-    font-size: 0.45rem;
+    font-size: 0.32rem;
   }
   .center-gap {
-    padding: 4px 0;
-    gap: 6px;
+    padding: 1px 0;
+    gap: 2px;
   }
   .center-text {
-    font-size: 0.45rem;
+    font-size: 0.32rem;
   }
   .hand-area {
-    padding: 6px 8px 10px;
-    margin-top: 4px;
+    padding: 2px 4px 4px;
+    margin-top: 1px;
   }
   .hand-label {
-    font-size: 0.55rem;
-    margin-bottom: 3px;
+    font-size: 0.38rem;
+    margin-bottom: 1px;
   }
   .hand-card {
-    width: 9vw;
-    height: 11vw;
+    width: 4.5vw;
+    height: 5.5vw;
   }
   .hand-card .card-inner,
   .hand-card .card-front {
-    height: 11vw;
+    height: 5.5vw;
   }
   .hand-card .card-col {
-    font-size: clamp(0.2rem, 1.1vw, 0.38rem);
+    font-size: clamp(0.14rem, 0.55vw, 0.28rem);
   }
   .drag-ghost {
-    width: 9vw;
-    height: 11vw;
+    width: 5vw;
+    height: 5.5vw;
   }
   .drag-ghost .card-inner,
   .drag-ghost .card-front {
-    height: 11vw;
+    height: 5.5vw;
   }
   .card-slot .karuta-card {
     height: 100%;
@@ -856,15 +859,15 @@
     height: 100%;
   }
   .card-back-mon {
-    font-size: clamp(0.7rem, 1.4vw, 1.1rem);
+    font-size: clamp(0.5rem, 1vw, 0.8rem);
   }
   .memo-toast {
-    bottom: 8px;
-    font-size: 0.65rem;
-    padding: 6px 16px;
+    bottom: 4px;
+    font-size: 0.5rem;
+    padding: 3px 10px;
   }
   .flip-hint {
-    font-size: 0.55rem;
+    font-size: 0.42rem;
   }
 }
 
