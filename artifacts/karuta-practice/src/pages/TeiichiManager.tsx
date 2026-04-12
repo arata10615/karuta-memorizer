@@ -372,8 +372,8 @@ export default function TeiichiManager() {
                   ))}
                   <div className="teiichi-block-labels">
                     <div className="teiichi-block-label-spacer" />
-                    <div className="teiichi-block-label">左ブロック（外側優先 →）</div>
-                    <div className="teiichi-block-label">右ブロック（← 外側優先）</div>
+                    <div className="teiichi-block-label">左ブロック（← 外側優先）</div>
+                    <div className="teiichi-block-label">右ブロック（外側優先 →）</div>
                   </div>
                 </div>
               </div>
