@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@400;500;700&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Yuji+Syuku&display=block');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -456,17 +456,17 @@
 }
 
 .card-col {
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: 'Yuji Syuku', 'Noto Serif JP', serif;
   font-size: clamp(0.5rem, 1vw, 0.72rem);
-  line-height: 1.32;
+  line-height: 1.18;
   color: #111;
   writing-mode: vertical-rl;
   text-orientation: mixed;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.02em;
   word-break: keep-all;
   white-space: nowrap;
   text-align: center;
-  font-weight: 500;
+  font-weight: 400;
   flex-shrink: 0;
 }
 
