@@ -8,6 +8,7 @@ import {
   splitTextIntoColumns,
 } from "@/data/karuta";
 import {
+  ensureUser,
   recordPlacement,
   smartAutoPlace,
 } from "@/data/placementMemory";
@@ -70,7 +71,7 @@ export default function KarutaBoard() {
     dragRef.current = null;
   }, []);
 
-  useEffect(() => { initBoard(); }, [initBoard]);
+  useEffect(() => { ensureUser(); initBoard(); }, [initBoard]);
 
   const placedCount = selfGrid.flat().filter((c) => c !== null).length;
   const allPlaced = placedCount === myCardCount.current;
@@ -338,7 +339,8 @@ export default function KarutaBoard() {
       selfGrid,
       GRID_ROWS,
       GRID_COLS,
-      rowCounts
+      rowCounts,
+      "self"
     );
     setSelfGrid(newGrid);
     setHandCards([]);
@@ -347,7 +349,7 @@ export default function KarutaBoard() {
 
   const startMemorizing = () => {
     if (!allPlaced) return;
-    recordPlacement(selfGrid);
+    recordPlacement(selfGrid, opGrid);
     setGameState("memorizing");
     setElapsed(0);
     intervalRef.current = setInterval(() => setElapsed((p) => p + 1), 1000);
