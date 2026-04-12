@@ -33,7 +33,9 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Type**: React + Vite + API backend
 - **Preview path**: `/`
 - **Purpose**: 競技かるた（百人一首）の暗記練習ウェブアプリ
+- **Routes**: `/` → スタート画面、`/game` → ゲームボード
 - **Features**:
+  - スタート画面（タイトル、スタートボタン、ログインボタン、自動ログインチェックボックス）
   - 100首からランダムに50枚を選出、敵25枚・自分25枚に分配
   - 敵陣は上下反転表示（相手目線）、左右に詰めて中央を開ける配置（下段10枚、中段8枚、上段7枚）
   - 自陣はタップまたは長押しドラッグで自由配置
@@ -46,6 +48,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - リセットボタンで新しいカードセットを再配分
   - デバイスベース自動ユーザー識別（localStorage UUID）
 - **Key files**:
+  - `src/pages/StartScreen.tsx` — スタート画面（ログイン・自動ログイン）
   - `src/data/karuta.ts` — 百人一首100首のデータ、ランダム配分、グリッド配置
   - `src/data/placementMemory.ts` — デバイスID管理、サーバーAPI連携の学習配置システム
   - `src/pages/KarutaBoard.tsx` — メインゲームボード（ドラッグ&ドロップ対応）

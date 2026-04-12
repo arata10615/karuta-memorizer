@@ -847,6 +847,138 @@
 }
 
 /* ===========================================
+   START SCREEN
+   =========================================== */
+.start-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #6b8c52;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 18px,
+      rgba(0,0,0,0.06) 18px,
+      rgba(0,0,0,0.06) 19px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 18px,
+      rgba(0,0,0,0.03) 18px,
+      rgba(0,0,0,0.03) 19px
+    );
+}
+
+.start-content {
+  text-align: center;
+  padding: 48px 40px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  backdrop-filter: blur(4px);
+  min-width: 320px;
+}
+
+.start-title {
+  font-family: "Yuji Syuku", serif;
+  font-size: 2.4rem;
+  color: #fff;
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.4);
+  margin: 0;
+  letter-spacing: 0.15em;
+}
+
+.start-subtitle {
+  font-family: "Yuji Syuku", serif;
+  font-size: 1.4rem;
+  color: rgba(255,255,255,0.85);
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+  margin: 4px 0 0;
+  letter-spacing: 0.2em;
+  font-weight: normal;
+}
+
+.start-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 36px;
+}
+
+.start-btn {
+  font-family: "Yuji Syuku", serif;
+  font-size: 1.2rem;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.1em;
+  transition: transform 0.1s, box-shadow 0.15s;
+}
+
+.start-btn:active {
+  transform: scale(0.97);
+}
+
+.start-btn-primary {
+  background: #d4a83a;
+  color: #3a2a0a;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+  font-weight: bold;
+}
+
+.start-btn-primary:hover {
+  background: #e0b84a;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.35);
+}
+
+.start-btn-login {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.35);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.start-btn-login:hover:not(:disabled) {
+  background: rgba(255,255,255,0.3);
+}
+
+.start-btn-logged-in {
+  background: rgba(100,180,100,0.3);
+  border-color: rgba(100,180,100,0.5);
+  cursor: default;
+  opacity: 0.85;
+}
+
+.auto-login-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  color: rgba(255,255,255,0.75);
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.auto-login-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #d4a83a;
+  cursor: pointer;
+}
+
+.login-status {
+  margin-top: 12px;
+  color: rgba(200,255,200,0.8);
+  font-size: 0.8rem;
+}
+
+/* ===========================================
    UTILITY LAYER (shadcn compat)
    =========================================== */
 @layer utilities {

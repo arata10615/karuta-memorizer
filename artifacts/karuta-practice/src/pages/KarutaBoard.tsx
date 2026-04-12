@@ -8,7 +8,6 @@ import {
   splitTextIntoColumns,
 } from "@/data/karuta";
 import {
-  ensureUser,
   recordPlacement,
   smartAutoPlace,
 } from "@/data/placementMemory";
@@ -73,7 +72,7 @@ export default function KarutaBoard() {
     dragRef.current = null;
   }, []);
 
-  useEffect(() => { ensureUser(); initBoard(); }, [initBoard]);
+  useEffect(() => { initBoard(); }, [initBoard]);
 
   const placedCount = selfGrid.flat().filter((c) => c !== null).length;
   const allPlaced = placedCount === myCardCount.current;

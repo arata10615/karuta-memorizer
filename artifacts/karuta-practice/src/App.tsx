@@ -2,6 +2,7 @@ import { Switch, Route, Router as WouterRouter } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import StartScreen from "@/pages/StartScreen";
 import KarutaBoard from "@/pages/KarutaBoard";
 import NotFound from "@/pages/not-found";
 
@@ -10,7 +11,8 @@ const queryClient = new QueryClient();
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={KarutaBoard} />
+      <Route path="/" component={StartScreen} />
+      <Route path="/game" component={KarutaBoard} />
       <Route component={NotFound} />
     </Switch>
   );
