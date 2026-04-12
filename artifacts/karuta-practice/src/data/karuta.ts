@@ -111,10 +111,19 @@ export function dealRandomCards(): { myCards: number[]; opCards: number[] } {
   const allIds = ALL_CARDS.map((c) => c.id);
   const shuffled = shuffleArray(allIds);
   const selected = shuffled.slice(0, 50);
-  return {
-    myCards: selected.slice(0, 25),
-    opCards: selected.slice(25, 50),
-  };
+  const myCards = selected.slice(0, 25);
+  const opCards = selected.slice(25, 50);
+  const mySet = new Set(myCards);
+  const opSet = new Set(opCards);
+  if (mySet.size !== 25 || opSet.size !== 25) {
+    console.error("Duplicate detected in deal!");
+  }
+  for (const id of myCards) {
+    if (opSet.has(id)) {
+      console.error(`Card ${id} appears in both fields!`);
+    }
+  }
+  return { myCards, opCards };
 }
 
 export const GRID_COLS = 16;
