@@ -13,7 +13,6 @@ import {
   setActivePattern,
   updateCardPositions,
   clearAllCards,
-  generateThumbnail,
   TEIICHI_ROWS,
   TEIICHI_COLS,
   BLOCK_SIZE,
@@ -29,6 +28,7 @@ export default function TeiichiManager() {
   const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
   const [board, setBoard] = useState<(number | null)[][]>(() => createEmptyBoard());
   const [cardPositions, setCardPositions] = useState<Record<number, CardPosition>>({});
+  const [showFullscreen, setShowFullscreen] = useState(false);
   function createEmptyBoard(): (number | null)[][] {
     return Array.from({ length: TEIICHI_ROWS }, () =>
       Array.from({ length: TEIICHI_COLS }, () => null)
@@ -37,16 +37,6 @@ export default function TeiichiManager() {
 
   const refreshPatterns = useCallback(() => {
     const p = loadPatterns();
-    let needsSave = false;
-    for (const pat of p) {
-      if (!pat.thumbnail && Object.keys(pat.cardPositions).length > 0) {
-        pat.thumbnail = generateThumbnail(pat.cardPositions);
-        needsSave = true;
-      }
-    }
-    if (needsSave) {
-      localStorage.setItem("karuta_teiichi_patterns", JSON.stringify(p));
-    }
     setPatterns(p);
     return p;
   }, []);
@@ -265,13 +255,6 @@ export default function TeiichiManager() {
                 className={`teiichi-pattern-item ${selectedPatternId === p.patternId ? "selected" : ""} ${p.isActive ? "active" : ""}`}
                 onClick={() => selectPattern(p)}
               >
-                {p.thumbnail && (
-                  <img
-                    src={p.thumbnail}
-                    alt={`${p.patternName}のサムネイル`}
-                    className="teiichi-pattern-thumbnail"
-                  />
-                )}
                 <div className="teiichi-pattern-info">
                   {editingNameId === p.patternId ? (
                     <input
@@ -341,6 +324,14 @@ export default function TeiichiManager() {
                   <span className="teiichi-placed-count">
                     配置済み: {Object.keys(cardPositions).length}/100
                   </span>
+                  <button
+                    className="teiichi-btn teiichi-btn-expand"
+                    onClick={() => setShowFullscreen(true)}
+                    disabled={Object.keys(cardPositions).length === 0}
+                    title="盤面を拡大表示"
+                  >
+                    拡大
+                  </button>
                   <button
                     className="teiichi-btn teiichi-btn-clear"
                     onClick={handleClearAll}
@@ -425,6 +416,49 @@ export default function TeiichiManager() {
           </>
         )}
       </div>
+
+      {showFullscreen && selectedPattern && (
+        <div className="teiichi-fullscreen-overlay" onClick={() => setShowFullscreen(false)}>
+          <div className="teiichi-fullscreen-header">
+            <span className="teiichi-fullscreen-title">{selectedPattern.patternName}</span>
+            <button className="teiichi-fullscreen-close" onClick={() => setShowFullscreen(false)}>
+              閉じる
+            </button>
+          </div>
+          <div className="teiichi-fullscreen-board" onClick={(e) => e.stopPropagation()}>
+            <div className="teiichi-fullscreen-grid">
+              {Array.from({ length: TEIICHI_ROWS }, (_, rowIdx) => (
+                <div key={rowIdx} className="teiichi-fs-row">
+                  <div className="teiichi-fs-row-label">
+                    {["上段", "中段", "下段"][rowIdx]}
+                  </div>
+                  <div className="teiichi-fs-row-cells">
+                    {Array.from({ length: TEIICHI_COLS }, (_, colIdx) => {
+                      const cardId = board[rowIdx][colIdx];
+                      const isBlockBorder = colIdx === BLOCK_SIZE;
+                      return (
+                        <div
+                          key={colIdx}
+                          className={`teiichi-fs-cell ${isBlockBorder ? "block-border" : ""} ${cardId !== null ? "filled" : "empty"}`}
+                        >
+                          {cardId !== null && (
+                            <TeiichiCardMini cardId={cardId} />
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+              <div className="teiichi-block-labels">
+                <div className="teiichi-block-label-spacer" />
+                <div className="teiichi-block-label">左ブロック（← 外側優先）</div>
+                <div className="teiichi-block-label">右ブロック（外側優先 →）</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

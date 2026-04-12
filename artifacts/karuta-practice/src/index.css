@@ -1647,6 +1647,19 @@
   cursor: not-allowed;
 }
 
+.teiichi-btn-expand {
+  background: rgba(30,68,138,0.12);
+  color: #1e448a;
+  border: 1px solid rgba(30,68,138,0.3);
+}
+.teiichi-btn-expand:hover:not(:disabled) {
+  background: rgba(30,68,138,0.22);
+}
+.teiichi-btn-expand:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
 .teiichi-btn-clear {
   background: rgba(180,60,60,0.15);
   color: #8a1e1e;
@@ -1688,20 +1701,10 @@
   border-left: 3px solid #1e448a;
 }
 
-.teiichi-pattern-thumbnail {
-  width: 160px;
-  height: auto;
-  border-radius: 4px;
-  border: 1px solid #d4c8a8;
-  flex-shrink: 0;
-  image-rendering: pixelated;
-}
-
 .teiichi-pattern-info {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
+  align-items: center;
+  gap: 10px;
   flex: 1;
   min-width: 0;
 }
@@ -2003,7 +2006,145 @@
   background: #e8f0ff;
 }
 
+.teiichi-fullscreen-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.teiichi-fullscreen-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100vw;
+  padding: 0 8px 12px;
+}
+
+.teiichi-fullscreen-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.teiichi-fullscreen-close {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 6px;
+  padding: 8px 20px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+.teiichi-fullscreen-close:hover {
+  background: rgba(255,255,255,0.25);
+}
+
+.teiichi-fullscreen-board {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.teiichi-fullscreen-grid {
+  transform-origin: center center;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.teiichi-fs-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.teiichi-fs-row-label {
+  writing-mode: vertical-rl;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.6);
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.teiichi-fs-row-cells {
+  display: flex;
+  gap: 1px;
+}
+
+.teiichi-fs-cell {
+  width: 1.7vw;
+  min-width: 14px;
+  height: 4.5vw;
+  min-height: 38px;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.teiichi-fs-cell.empty {
+  background: rgba(255,255,255,0.06);
+  border: 1px dashed rgba(255,255,255,0.12);
+}
+.teiichi-fs-cell.filled {
+  background: #fff;
+  border: 1.5px solid #2e7d32;
+}
+.teiichi-fs-cell.block-border {
+  margin-left: 12px;
+}
+
+.teiichi-fs-cell .teiichi-card-mini {
+  width: 100%;
+  height: 100%;
+}
+.teiichi-fs-cell .teiichi-card-text {
+  gap: 0;
+}
+.teiichi-fs-cell .teiichi-card-col {
+  font-size: 0.32rem;
+  line-height: 1;
+}
+.teiichi-fs-cell .teiichi-card-no {
+  font-size: 0.4rem;
+}
+
 @media (max-width: 600px) {
+  .teiichi-fullscreen-overlay {
+    padding: 8px 4px;
+  }
+  .teiichi-fs-cell {
+    min-width: 10px;
+    min-height: 28px;
+  }
+  .teiichi-fs-cell .teiichi-card-col {
+    font-size: 0.22rem;
+  }
+  .teiichi-fs-cell .teiichi-card-no {
+    font-size: 0.3rem;
+  }
+  .teiichi-fs-cell.block-border {
+    margin-left: 6px;
+  }
+  .teiichi-fullscreen-grid {
+    gap: 2px;
+  }
+  .teiichi-fs-row-cells {
+    gap: 0;
+  }
   .teiichi-content {
     padding: 12px 8px 32px;
   }
@@ -2012,9 +2153,6 @@
   }
   .teiichi-pattern-item {
     padding: 8px 10px;
-  }
-  .teiichi-pattern-thumbnail {
-    width: 120px;
   }
   .teiichi-pattern-name {
     font-size: 0.82rem;
