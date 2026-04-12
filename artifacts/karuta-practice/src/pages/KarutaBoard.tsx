@@ -14,6 +14,10 @@ import {
   recordPlacement,
   smartAutoPlace,
 } from "@/data/placementMemory";
+import {
+  getActivePattern,
+  autoPlaceWithTeiichi,
+} from "@/data/teiichiPattern";
 
 type GameState = "placing" | "memorizing" | "stopped";
 type Grid = (number | null)[][];
@@ -347,6 +351,34 @@ export default function KarutaBoard() {
 
   const autoPlace = async () => {
     const rowCounts = [7, 8, 10];
+    const activePattern = getActivePattern();
+    const allCardIds = [...handCards];
+    for (let r = 0; r < GRID_ROWS; r++) {
+      for (let c = 0; c < GRID_COLS; c++) {
+        if (selfGrid[r][c] !== null) allCardIds.push(selfGrid[r][c]!);
+      }
+    }
+
+    if (activePattern && Object.keys(activePattern.cardPositions).length > 0) {
+      const hasMatchingCards = allCardIds.some(
+        (id) => activePattern.cardPositions[id] !== undefined
+      );
+      if (hasMatchingCards) {
+        const newGrid = autoPlaceWithTeiichi(
+          allCardIds,
+          activePattern,
+          GRID_ROWS,
+          GRID_COLS,
+          rowCounts
+        );
+        setSelfGrid(newGrid);
+        setHandCards([]);
+        setSelectedCard(null);
+        setSelfAutoPlaced(true);
+        return;
+      }
+    }
+
     const newGrid = await smartAutoPlace(
       handCards,
       selfGrid,

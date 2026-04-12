@@ -1537,6 +1537,493 @@
 }
 
 /* ===========================================
+   START SCREEN: TEIICHI BUTTON
+   =========================================== */
+.start-btn-teiichi {
+  background: rgba(30,68,138,0.3);
+  color: #e0d8c8;
+  border: 1px solid rgba(100,140,200,0.4);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.start-btn-teiichi:hover {
+  background: rgba(30,68,138,0.45);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+}
+
+/* ===========================================
+   TEIICHI MANAGER PAGE
+   =========================================== */
+.teiichi-page {
+  min-height: 100vh;
+  background-color: #f7f4ed;
+  color: #2a2015;
+  font-family: 'Noto Sans JP', sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.teiichi-header {
+  background: rgba(18,10,4,0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 2px solid rgba(210,170,80,0.45);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.teiichi-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teiichi-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ead595;
+  letter-spacing: 0.12em;
+  margin: 0;
+}
+
+.teiichi-content {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.teiichi-section-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #3a2a0a;
+  margin: 0;
+  letter-spacing: 0.06em;
+}
+
+.teiichi-patterns {
+  background: #fff;
+  border: 1px solid #e0d8c8;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.teiichi-patterns-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.teiichi-btn {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.04em;
+}
+
+.teiichi-btn-create {
+  background: #1e448a;
+  color: #f0e8d0;
+}
+.teiichi-btn-create:hover:not(:disabled) {
+  background: #2654a8;
+}
+.teiichi-btn-create:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.teiichi-btn-clear {
+  background: rgba(180,60,60,0.15);
+  color: #8a1e1e;
+  border: 1px solid rgba(180,60,60,0.3);
+}
+.teiichi-btn-clear:hover:not(:disabled) {
+  background: rgba(180,60,60,0.25);
+}
+.teiichi-btn-clear:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.teiichi-pattern-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.teiichi-pattern-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid #e0d8c8;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  gap: 8px;
+}
+.teiichi-pattern-item:hover {
+  background: #f5f0e5;
+}
+.teiichi-pattern-item.selected {
+  background: #eee8d8;
+  border-color: #d4a83a;
+}
+.teiichi-pattern-item.active {
+  border-left: 3px solid #1e448a;
+}
+
+.teiichi-pattern-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.teiichi-pattern-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #2a2015;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teiichi-pattern-count {
+  font-size: 0.75rem;
+  color: #888;
+  white-space: nowrap;
+}
+
+.teiichi-active-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #1e448a;
+  background: rgba(30,68,138,0.1);
+  border: 1px solid rgba(30,68,138,0.3);
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.teiichi-name-input {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.92rem;
+  padding: 2px 8px;
+  border: 1px solid #d4a83a;
+  border-radius: 4px;
+  outline: none;
+  background: #fff;
+  width: 160px;
+}
+
+.teiichi-pattern-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.teiichi-action-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: all 0.15s;
+}
+.teiichi-action-btn:hover {
+  background: #f0f0f0;
+}
+
+.teiichi-activate-btn {
+  color: #1e448a;
+  font-weight: 700;
+}
+.teiichi-activate-btn:hover {
+  background: rgba(30,68,138,0.1);
+}
+
+.teiichi-delete-btn {
+  color: #8a1e1e;
+}
+.teiichi-delete-btn:hover {
+  background: rgba(180,60,60,0.1);
+}
+
+.teiichi-empty-msg {
+  font-size: 0.88rem;
+  color: #888;
+  text-align: center;
+  padding: 16px;
+  margin: 0;
+}
+
+.teiichi-board-section {
+  background: #fff;
+  border: 1px solid #e0d8c8;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.teiichi-board-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.teiichi-board-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.teiichi-placed-count {
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.teiichi-board-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+
+.teiichi-board {
+  min-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.teiichi-row {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.teiichi-row-label {
+  width: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Noto Serif JP', serif;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #888;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  background: #f5f0e5;
+  border-radius: 3px 0 0 3px;
+  border: 1px solid #e0d8c8;
+  border-right: none;
+}
+
+.teiichi-row-cells {
+  display: flex;
+  flex: 1;
+  gap: 1px;
+}
+
+.teiichi-cell {
+  width: 24px;
+  min-width: 24px;
+  height: 56px;
+  border: 1px solid #e0d8c8;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.teiichi-cell.block-border {
+  margin-left: 6px;
+  border-left: 2px solid #d4a83a;
+}
+
+.teiichi-cell.empty {
+  background: #faf8f2;
+}
+.teiichi-cell.empty:hover {
+  background: #f0ece0;
+}
+.teiichi-cell.empty.drop-target {
+  background: rgba(30,68,138,0.08);
+  border-color: rgba(30,68,138,0.4);
+}
+
+.teiichi-cell.filled {
+  background: #fff;
+  border-color: #3a8a3a;
+}
+.teiichi-cell.filled:hover {
+  box-shadow: 0 0 0 2px rgba(60,140,255,0.3);
+}
+
+.teiichi-cell.selected {
+  box-shadow: 0 0 0 2px rgba(60,140,255,0.7);
+  background: #e8f0ff;
+  z-index: 1;
+}
+
+.teiichi-card-mini {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 1px;
+}
+
+.teiichi-card-text {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+}
+
+.teiichi-card-col {
+  font-family: 'Yuji Syuku', 'Noto Serif JP', serif;
+  font-size: 0.38rem;
+  line-height: 1.1;
+  color: #111;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.teiichi-card-no {
+  font-size: 0.28rem;
+  color: #907040;
+  font-family: 'Noto Sans JP', sans-serif;
+  opacity: 0.6;
+}
+
+.teiichi-block-labels {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.teiichi-block-label-spacer {
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.teiichi-block-label {
+  flex: 1;
+  text-align: center;
+  font-size: 0.72rem;
+  color: #888;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.teiichi-unplaced {
+  background: #fff;
+  border: 1px solid #e0d8c8;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.teiichi-hint {
+  font-size: 0.78rem;
+  color: #1e448a;
+  margin: 8px 0 4px;
+  font-weight: 500;
+}
+
+.teiichi-unplaced-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 10px;
+}
+
+.teiichi-unplaced-card {
+  width: 40px;
+  height: 54px;
+  border: 1.5px solid #3a8a3a;
+  border-radius: 2px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.12s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.teiichi-unplaced-card:hover {
+  box-shadow: 0 0 0 2px rgba(60,140,255,0.3);
+}
+.teiichi-unplaced-card.selected {
+  box-shadow: 0 0 0 2px rgba(60,140,255,0.7);
+  background: #e8f0ff;
+}
+
+@media (max-width: 600px) {
+  .teiichi-content {
+    padding: 12px 8px 32px;
+  }
+  .teiichi-title {
+    font-size: 0.95rem;
+  }
+  .teiichi-pattern-item {
+    padding: 8px 10px;
+  }
+  .teiichi-pattern-name {
+    font-size: 0.82rem;
+  }
+  .teiichi-unplaced-card {
+    width: 36px;
+    height: 48px;
+  }
+  .teiichi-cell {
+    width: 20px;
+    min-width: 20px;
+    height: 48px;
+  }
+  .teiichi-card-col {
+    font-size: 0.32rem;
+  }
+  .teiichi-board {
+    min-width: 950px;
+  }
+}
+
+/* ===========================================
    UTILITY LAYER (shadcn compat)
    =========================================== */
 @layer utilities {

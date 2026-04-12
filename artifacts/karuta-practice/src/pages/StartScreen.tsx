@@ -160,6 +160,10 @@ export default function StartScreen() {
             スタート
           </button>
 
+          <button className="start-btn start-btn-teiichi" onClick={() => navigate("/teiichi")}>
+            定位置
+          </button>
+
           {!loggedIn ? (
             <>
               <button className="start-btn start-btn-login" onClick={handleDeviceLogin}>

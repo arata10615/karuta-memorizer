@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import StartScreen from "@/pages/StartScreen";
 import KarutaBoard from "@/pages/KarutaBoard";
+import TeiichiManager from "@/pages/TeiichiManager";
 import HowToUse from "@/pages/HowToUse";
 import AboutMemorization from "@/pages/AboutMemorization";
 import FAQ from "@/pages/FAQ";
@@ -18,6 +19,7 @@ function Router() {
     <Switch>
       <Route path="/" component={StartScreen} />
       <Route path="/game" component={KarutaBoard} />
+      <Route path="/teiichi" component={TeiichiManager} />
       <Route path="/howto" component={HowToUse} />
       <Route path="/about-memorization" component={AboutMemorization} />
       <Route path="/faq" component={FAQ} />
