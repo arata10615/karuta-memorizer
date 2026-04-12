@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 const NAV_LINKS = [
   { path: "/", label: "トップ" },
   { path: "/game", label: "練習する" },
+  { path: "/teiichi", label: "定位置" },
   { path: "/howto", label: "使い方" },
   { path: "/about-memorization", label: "暗記時間とは" },
   { path: "/faq", label: "よくある質問" },

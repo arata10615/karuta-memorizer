@@ -215,6 +215,7 @@ export default function StartScreen() {
             { path: "/howto", label: "使い方" },
             { path: "/about-memorization", label: "暗記時間とは" },
             { path: "/faq", label: "よくある質問" },
+            { path: "/teiichi", label: "定位置" },
             { path: "/privacy", label: "プライバシーポリシー" },
             { path: "/contact", label: "お問い合わせ" },
           ].map((link) => (
