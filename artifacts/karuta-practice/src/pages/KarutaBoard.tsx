@@ -402,7 +402,7 @@ export default function KarutaBoard() {
     return (
       <div className="card-inner">
         <div className="card-front" style={{ opacity: faceUp ? 1 : 0, pointerEvents: faceUp ? "auto" : "none" }}>
-          <div className="card-text-3col">
+          <div className="card-text-3col" translate="no">
             {cols.map((col, i) => (
               <span key={i} className="card-col">{col}</span>
             ))}
@@ -588,7 +588,7 @@ export default function KarutaBoard() {
                     >
                       <div className="card-inner">
                         <div className="card-front">
-                          <div className="card-text-3col">
+                          <div className="card-text-3col" translate="no">
                             {cols.map((col, i) => (
                               <span key={i} className="card-col">{col}</span>
                             ))}
@@ -619,7 +619,7 @@ export default function KarutaBoard() {
         >
           <div className="card-inner">
             <div className="card-front">
-              <div className="card-text-3col">
+              <div className="card-text-3col" translate="no">
                 {dragCols.map((col, i) => (
                   <span key={i} className="card-col">{col}</span>
                 ))}
