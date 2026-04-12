@@ -780,6 +780,9 @@
   .card-row {
     height: 6vw;
   }
+  .card-slot {
+    height: 6vw;
+  }
   .karuta-card {
     height: 6vw;
   }
