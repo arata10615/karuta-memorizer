@@ -53,18 +53,16 @@ export default function StartScreen() {
       setGoogleClientId(id);
     });
 
-    const existingUserId = getUserId();
-    const existingName = getDisplayName();
-    const linked = isGoogleLinked();
-
-    if (existingUserId) {
-      setLoggedIn(true);
-      setDisplayName(existingName);
-      setGoogleLinked(linked);
-    }
-
-    if (saved === "true" && !existingUserId) {
-      doDeviceLogin().then(() => setLoading(false));
+    if (saved === "true") {
+      const existingUserId = getUserId();
+      if (existingUserId) {
+        setLoggedIn(true);
+        setDisplayName(getDisplayName());
+        setGoogleLinked(isGoogleLinked());
+        setLoading(false);
+      } else {
+        doDeviceLogin().then(() => setLoading(false));
+      }
     } else {
       setLoading(false);
     }
