@@ -48,6 +48,7 @@ export default function KarutaBoard() {
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [faceUpMap, setFaceUpMap] = useState<Record<number, boolean>>({});
   const [dragState, setDragState] = useState<DragState | null>(null);
+  const [selfAutoPlaced, setSelfAutoPlaced] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reviewIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -68,6 +69,7 @@ export default function KarutaBoard() {
     setGameState("placing");
     setFaceUpMap({});
     setDragState(null);
+    setSelfAutoPlaced(false);
     dragRef.current = null;
   }, []);
 
@@ -345,11 +347,12 @@ export default function KarutaBoard() {
     setSelfGrid(newGrid);
     setHandCards([]);
     setSelectedCard(null);
+    setSelfAutoPlaced(true);
   };
 
   const startMemorizing = () => {
     if (!allPlaced) return;
-    recordPlacement(selfGrid, opGrid);
+    recordPlacement(selfAutoPlaced ? null : selfGrid, opGrid);
     setGameState("memorizing");
     setElapsed(0);
     intervalRef.current = setInterval(() => setElapsed((p) => p + 1), 1000);

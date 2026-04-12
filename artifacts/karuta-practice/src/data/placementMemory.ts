@@ -54,15 +54,17 @@ let cachedSelfPairs: { cardA: number; cardB: number; count: number }[] | null = 
 let cachedGlobalPairs: { cardA: number; cardB: number; count: number }[] | null = null;
 
 export async function recordPlacement(
-  selfGrid: (number | null)[][],
+  selfGrid: (number | null)[][] | null,
   opGrid: (number | null)[][]
 ) {
   try {
     const userId = getUserId();
+    const body: Record<string, unknown> = { opGrid, userId };
+    if (selfGrid) body.selfGrid = selfGrid;
     await fetch(`${API_BASE}/placements`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selfGrid, opGrid, userId }),
+      body: JSON.stringify(body),
     });
     cachedSelfModel = null;
     cachedGlobalModel = null;
