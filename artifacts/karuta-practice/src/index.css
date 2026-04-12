@@ -268,6 +268,16 @@
 }
 .btn-reset:hover { background: rgba(60,38,14,0.75); transform: translateY(-1px); }
 
+.btn-back {
+  background: rgba(40,25,10,0.5);
+  color: #c8a860;
+  border: 1px solid rgba(210,170,80,0.3);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  margin-right: 8px;
+}
+.btn-back:hover { background: rgba(60,38,14,0.65); transform: translateY(-1px); }
+
 /* ===========================================
    BOARD MAIN
    =========================================== */

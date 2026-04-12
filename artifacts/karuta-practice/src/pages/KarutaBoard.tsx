@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { useLocation } from "wouter";
 import {
   ALL_CARDS,
   dealRandomCards,
@@ -48,6 +49,7 @@ export default function KarutaBoard() {
   const [faceUpMap, setFaceUpMap] = useState<Record<number, boolean>>({});
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [selfAutoPlaced, setSelfAutoPlaced] = useState(false);
+  const [, navigate] = useLocation();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reviewIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -509,6 +511,7 @@ export default function KarutaBoard() {
     <div className="app-root">
       <header className="app-header">
         <div className="header-left">
+          <button className="btn btn-back" onClick={() => navigate("/")}>戻る</button>
           <h1 className="app-title">競技かるた</h1>
           <span className="app-subtitle">暗記練習</span>
         </div>
