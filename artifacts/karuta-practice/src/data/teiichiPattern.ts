@@ -168,12 +168,48 @@ export function autoPlaceWithTeiichi(
     Array.from({ length: gridCols }, () => null)
   );
 
-  const sorted = sortCardsByTeiichiPriority(cardIds, pattern);
+  const leftCards: { id: number; row: number; col: number }[] = [];
+  const rightCards: { id: number; row: number; col: number }[] = [];
+  const unpositioned: number[] = [];
 
-  let idx = 0;
-  for (let r = 0; r < gridRows && idx < sorted.length; r++) {
-    for (let c = 0; c < rowCounts[r] && idx < sorted.length; c++) {
-      grid[r][c] = sorted[idx++];
+  for (const id of cardIds) {
+    const pos = pattern.cardPositions[id];
+    if (pos !== undefined) {
+      if (getBlockIndex(pos.col) === "left") {
+        leftCards.push({ id, row: pos.row, col: pos.col });
+      } else {
+        rightCards.push({ id, row: pos.row, col: TEIICHI_COLS - 1 - pos.col });
+      }
+    } else {
+      unpositioned.push(id);
+    }
+  }
+
+  leftCards.sort((a, b) => a.row * BLOCK_SIZE + a.col - (b.row * BLOCK_SIZE + b.col));
+  rightCards.sort((a, b) => a.row * BLOCK_SIZE + a.col - (b.row * BLOCK_SIZE + b.col));
+
+  let li = 0;
+  let ri = 0;
+  let ui = 0;
+
+  for (let r = 0; r < gridRows; r++) {
+    const count = rowCounts[r];
+    const leftCount = Math.ceil(count / 2);
+    const rightCount = count - leftCount;
+
+    for (let c = 0; c < leftCount; c++) {
+      if (li < leftCards.length) {
+        grid[r][c] = leftCards[li++].id;
+      } else if (ui < unpositioned.length) {
+        grid[r][c] = unpositioned[ui++];
+      }
+    }
+    for (let c = 0; c < rightCount; c++) {
+      if (ri < rightCards.length) {
+        grid[r][gridCols - 1 - c] = rightCards[ri++].id;
+      } else if (ui < unpositioned.length) {
+        grid[r][gridCols - 1 - c] = unpositioned[ui++];
+      }
     }
   }
 

@@ -1581,6 +1581,39 @@
   gap: 12px;
 }
 
+.teiichi-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.teiichi-unsaved-badge {
+  background: rgba(220,160,40,0.25);
+  color: #f0c040;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(220,160,40,0.4);
+}
+
+.teiichi-btn-save {
+  background: rgba(46,180,50,0.25);
+  color: #7ddb82;
+  border: 1px solid rgba(46,180,50,0.45);
+  font-weight: 700;
+}
+.teiichi-btn-save:hover:not(:disabled) {
+  background: rgba(46,180,50,0.4);
+}
+.teiichi-btn-save:disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+  color: rgba(255,255,255,0.3);
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.05);
+}
+
 .teiichi-title {
   font-family: 'Noto Serif JP', serif;
   font-size: 1.1rem;

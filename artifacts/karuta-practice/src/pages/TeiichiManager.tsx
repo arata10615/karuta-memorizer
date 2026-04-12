@@ -29,6 +29,8 @@ export default function TeiichiManager() {
   const [board, setBoard] = useState<(number | null)[][]>(() => createEmptyBoard());
   const [cardPositions, setCardPositions] = useState<Record<number, CardPosition>>({});
   const [showFullscreen, setShowFullscreen] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [savedPositions, setSavedPositions] = useState<Record<number, CardPosition>>({});
   function createEmptyBoard(): (number | null)[][] {
     return Array.from({ length: TEIICHI_ROWS }, () =>
       Array.from({ length: TEIICHI_COLS }, () => null)
@@ -50,8 +52,13 @@ export default function TeiichiManager() {
   }, []);
 
   const selectPattern = (pattern: TeiichiPattern) => {
+    if (hasUnsavedChanges) {
+      if (!confirm("変更が保存されていません。保存せずに切り替えますか？")) return;
+    }
     setSelectedPatternId(pattern.patternId);
     setCardPositions({ ...pattern.cardPositions });
+    setSavedPositions({ ...pattern.cardPositions });
+    setHasUnsavedChanges(false);
     const newBoard = createEmptyBoard();
     for (const [idStr, pos] of Object.entries(pattern.cardPositions)) {
       const id = Number(idStr);
@@ -102,11 +109,20 @@ export default function TeiichiManager() {
     refreshPatterns();
   };
 
-  const saveCurrentPositions = (newPositions: Record<number, CardPosition>) => {
+  const handleSave = () => {
     if (selectedPatternId) {
-      updateCardPositions(selectedPatternId, newPositions);
+      updateCardPositions(selectedPatternId, cardPositions);
+      setSavedPositions({ ...cardPositions });
+      setHasUnsavedChanges(false);
       refreshPatterns();
     }
+  };
+
+  const handleBack = () => {
+    if (hasUnsavedChanges) {
+      if (!confirm("変更が保存されていません。保存せずに戻りますか？")) return;
+    }
+    navigate("/");
   };
 
   const handleCellClick = (row: number, col: number) => {
@@ -144,7 +160,7 @@ export default function TeiichiManager() {
 
       setBoard(newBoard);
       setCardPositions(newPositions);
-      saveCurrentPositions(newPositions);
+      setHasUnsavedChanges(true);
       setSelectedCardId(null);
       return;
     }
@@ -163,7 +179,7 @@ export default function TeiichiManager() {
 
       setBoard(newBoard);
       setCardPositions(newPositions);
-      saveCurrentPositions(newPositions);
+      setHasUnsavedChanges(true);
       setSelectedCardId(null);
     }
   };
@@ -184,7 +200,7 @@ export default function TeiichiManager() {
       delete newPositions[selectedCardId];
       setBoard(newBoard);
       setCardPositions(newPositions);
-      saveCurrentPositions(newPositions);
+      setHasUnsavedChanges(true);
       setSelectedCardId(null);
       return;
     }
@@ -203,7 +219,7 @@ export default function TeiichiManager() {
         delete newPositions[cardId];
         setBoard(newBoard);
         setCardPositions(newPositions);
-        saveCurrentPositions(newPositions);
+        setHasUnsavedChanges(true);
       }
       setSelectedCardId(null);
       return;
@@ -214,11 +230,10 @@ export default function TeiichiManager() {
   const handleClearAll = () => {
     if (!selectedPatternId) return;
     if (!confirm("全ての札の配置を消去しますか？")) return;
-    clearAllCards(selectedPatternId);
     setBoard(createEmptyBoard());
     setCardPositions({});
     setSelectedCardId(null);
-    refreshPatterns();
+    setHasUnsavedChanges(true);
   };
 
   const placedCardIds = new Set(Object.keys(cardPositions).map(Number));
@@ -230,8 +245,18 @@ export default function TeiichiManager() {
     <div className="teiichi-page">
       <header className="teiichi-header">
         <div className="teiichi-header-left">
-          <button className="btn btn-back" onClick={() => navigate("/")}>戻る</button>
+          <button className="btn btn-back" onClick={handleBack}>戻る</button>
           <h1 className="teiichi-title">定位置管理</h1>
+          {hasUnsavedChanges && <span className="teiichi-unsaved-badge">未保存</span>}
+        </div>
+        <div className="teiichi-header-right">
+          <button
+            className="teiichi-btn teiichi-btn-save"
+            onClick={handleSave}
+            disabled={!hasUnsavedChanges}
+          >
+            保存
+          </button>
         </div>
       </header>
 
