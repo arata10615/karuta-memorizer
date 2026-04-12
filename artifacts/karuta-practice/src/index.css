@@ -778,37 +778,33 @@
     gap: 1px;
   }
   .card-row {
-    height: 4.2vw;
-    overflow: hidden;
+    height: 6vw;
   }
   .karuta-card {
-    height: 100%;
-    max-height: 4.2vw;
+    height: 6vw;
   }
-  .card-inner {
-    height: 100%;
-  }
+  .card-inner,
   .card-front,
   .card-back {
-    height: 100%;
+    height: 6vw;
   }
   .card-front {
-    padding: 1px 0;
+    padding: 0;
     border-width: 1px;
     justify-content: center;
-    overflow: hidden;
+    align-items: center;
   }
   .card-text-3col {
     gap: 0;
-    align-items: center;
-    flex: 0 1 auto;
-    max-height: calc(100% - 2px);
+    align-items: flex-start;
+    justify-content: center;
+    height: calc(100% - 2px);
     overflow: hidden;
   }
   .card-col {
-    font-size: clamp(0.14rem, 0.55vw, 0.3rem);
+    font-size: 1.15vw;
     line-height: 1.0;
-    letter-spacing: -0.05em;
+    letter-spacing: -0.06em;
     flex-shrink: 1;
     overflow: hidden;
   }
@@ -816,10 +812,7 @@
     display: none;
   }
   .card-slot.empty {
-    min-height: 4.2vw;
-  }
-  .card-slot {
-    overflow: hidden;
+    min-height: 6vw;
   }
   .row-label-box {
     width: 14px;
@@ -844,32 +837,31 @@
     margin-bottom: 1px;
   }
   .hand-card {
-    width: 3.5vw;
-    height: 4.2vw;
-    overflow: hidden;
+    width: 4.5vw;
+    height: 6vw;
   }
   .hand-card .card-inner,
   .hand-card .card-front {
-    height: 100%;
+    height: 6vw;
   }
   .hand-card .card-col {
-    font-size: clamp(0.12rem, 0.45vw, 0.24rem);
+    font-size: 0.9vw;
   }
   .drag-ghost {
-    width: 4vw;
-    height: 4.2vw;
+    width: 5vw;
+    height: 6vw;
   }
   .drag-ghost .card-inner,
   .drag-ghost .card-front {
-    height: 4.2vw;
+    height: 6vw;
   }
-  .card-slot .karuta-card,
+  .card-slot .karuta-card {
+    height: 100%;
+  }
   .card-slot .karuta-card .card-inner,
   .card-slot .karuta-card .card-front,
   .card-slot .karuta-card .card-back {
     height: 100%;
-    max-height: 100%;
-    overflow: hidden;
   }
   .card-back-mon {
     font-size: clamp(0.5rem, 1vw, 0.8rem);
