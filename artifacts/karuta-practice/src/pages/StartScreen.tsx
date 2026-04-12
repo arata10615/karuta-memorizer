@@ -205,6 +205,28 @@ export default function StartScreen() {
             <span>自動ログイン</span>
           </label>
         )}
+
+        <nav className="start-footer-nav">
+          {[
+            { path: "/howto", label: "使い方" },
+            { path: "/about-memorization", label: "暗記時間とは" },
+            { path: "/faq", label: "よくある質問" },
+            { path: "/privacy", label: "プライバシーポリシー" },
+            { path: "/contact", label: "お問い合わせ" },
+          ].map((link) => (
+            <a
+              key={link.path}
+              href={link.path}
+              className="start-footer-link"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate(link.path);
+              }}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
       </div>
     </div>
   );

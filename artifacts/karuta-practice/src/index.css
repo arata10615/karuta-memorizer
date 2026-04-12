@@ -1174,6 +1174,369 @@
 }
 
 /* ===========================================
+   PAGE LAYOUT (content pages)
+   =========================================== */
+.page-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f7f4ed;
+  color: #2a2015;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+.page-header {
+  background: rgba(18,10,4,0.92);
+  backdrop-filter: blur(6px);
+  border-bottom: 2px solid rgba(210,170,80,0.45);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.page-header-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #ead595;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.page-header-title:hover { color: #f2e4a5; }
+
+.page-header-play {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f0e8d0;
+  background: linear-gradient(160deg, #1e448a, #122e6a);
+  padding: 6px 18px;
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.15s;
+  border: 1px solid #2a52a0;
+}
+.page-header-play:hover {
+  background: linear-gradient(160deg, #2654a8, #1a3880);
+  transform: translateY(-1px);
+}
+
+.page-main {
+  flex: 1;
+  max-width: 720px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+.page-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #2a2015;
+  margin: 0 0 28px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #d4a83a;
+  letter-spacing: 0.08em;
+}
+
+.page-intro {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: #3a3025;
+  margin: 0 0 24px;
+}
+
+.page-section {
+  margin-bottom: 28px;
+}
+
+.page-section h2 {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #3a2a0a;
+  margin: 0 0 10px;
+  padding-left: 12px;
+  border-left: 3px solid #d4a83a;
+}
+
+.page-section p {
+  font-size: 0.92rem;
+  line-height: 1.85;
+  color: #3a3025;
+  margin: 0 0 10px;
+}
+
+.page-list {
+  list-style: disc;
+  padding-left: 24px;
+  margin: 8px 0 0;
+}
+.page-list li {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: #3a3025;
+  margin-bottom: 4px;
+}
+
+.page-list-ordered {
+  list-style: decimal;
+  padding-left: 24px;
+  margin: 8px 0 0;
+}
+.page-list-ordered li {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: #3a3025;
+  margin-bottom: 6px;
+}
+
+.page-date {
+  font-size: 0.82rem;
+  color: #888;
+  margin-top: 32px;
+  text-align: right;
+}
+
+/* ===========================================
+   FAQ
+   =========================================== */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.faq-item {
+  background: #fff;
+  border: 1px solid #e0d8c8;
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.faq-q {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e448a;
+  margin: 0 0 8px;
+}
+.faq-a {
+  font-size: 0.92rem;
+  line-height: 1.8;
+  color: #3a3025;
+  margin: 0;
+}
+
+/* ===========================================
+   CONTACT FORM
+   =========================================== */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 560px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.form-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #3a2a0a;
+}
+
+.form-optional {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #888;
+  margin-left: 6px;
+}
+
+.form-required {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #c04040;
+  margin-left: 6px;
+}
+
+.form-input {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.92rem;
+  padding: 10px 14px;
+  border: 1px solid #d0c8b8;
+  border-radius: 6px;
+  background: #fff;
+  color: #2a2015;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus {
+  border-color: #d4a83a;
+}
+
+.form-textarea {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.92rem;
+  padding: 10px 14px;
+  border: 1px solid #d0c8b8;
+  border-radius: 6px;
+  background: #fff;
+  color: #2a2015;
+  outline: none;
+  resize: vertical;
+  transition: border-color 0.15s;
+}
+.form-textarea:focus {
+  border-color: #d4a83a;
+}
+
+.form-submit {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 32px;
+  background: #d4a83a;
+  color: #3a2a0a;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+  align-self: flex-start;
+  letter-spacing: 0.06em;
+}
+.form-submit:hover:not(:disabled) {
+  background: #e0b84a;
+  transform: translateY(-1px);
+}
+.form-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.contact-thanks {
+  text-align: center;
+  padding: 40px 20px;
+}
+.contact-thanks-title {
+  font-family: 'Noto Serif JP', serif;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #3a2a0a;
+  margin: 0 0 12px;
+}
+.contact-thanks p {
+  font-size: 0.92rem;
+  color: #555;
+  margin: 0;
+}
+
+/* ===========================================
+   SITE FOOTER
+   =========================================== */
+.site-footer {
+  background: rgba(18,10,4,0.92);
+  border-top: 2px solid rgba(210,170,80,0.3);
+  padding: 24px 20px 20px;
+  margin-top: auto;
+}
+
+.footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 20px;
+  margin-bottom: 14px;
+}
+
+.footer-link {
+  font-size: 0.82rem;
+  color: #c8a860;
+  text-decoration: none;
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.footer-link:hover {
+  color: #f2e4a5;
+}
+.footer-link.active {
+  color: #ead595;
+  font-weight: 700;
+}
+
+.footer-copy {
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(200,175,100,0.45);
+  margin: 0;
+}
+
+/* ===========================================
+   START SCREEN FOOTER NAV
+   =========================================== */
+.start-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+.start-footer-link {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.start-footer-link:hover {
+  color: rgba(255,255,255,0.85);
+}
+
+/* ===========================================
+   RESPONSIVE: content pages mobile
+   =========================================== */
+@media (max-width: 600px) {
+  .page-main {
+    padding: 20px 16px 36px;
+  }
+  .page-title {
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+  }
+  .page-section h2 {
+    font-size: 1.05rem;
+  }
+  .page-header {
+    padding: 10px 14px;
+  }
+  .page-header-title {
+    font-size: 0.88rem;
+  }
+  .page-header-play {
+    font-size: 0.75rem;
+    padding: 5px 14px;
+  }
+  .footer-nav {
+    gap: 6px 14px;
+  }
+  .footer-link {
+    font-size: 0.75rem;
+  }
+  .faq-item {
+    padding: 14px 16px;
+  }
+}
+
+/* ===========================================
    UTILITY LAYER (shadcn compat)
    =========================================== */
 @layer utilities {

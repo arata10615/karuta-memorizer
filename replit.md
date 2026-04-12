@@ -33,7 +33,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Type**: React + Vite + API backend
 - **Preview path**: `/`
 - **Purpose**: 競技かるた（百人一首）の暗記練習ウェブアプリ
-- **Routes**: `/` → スタート画面、`/game` → ゲームボード
+- **Routes**: `/` → スタート画面、`/game` → ゲームボード、`/howto` → 使い方、`/about-memorization` → 暗記時間とは、`/faq` → よくある質問、`/privacy` → プライバシーポリシー、`/contact` → お問い合わせ
 - **Features**:
   - スタート画面（タイトル、スタート、デバイスログイン、Googleログイン、自動ログイン、ログアウト）
   - Google AdSense広告（左右サイドバー＋リセット3回ごとのインタースティシャル広告）
@@ -48,12 +48,26 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - 緑枠・白背景のカードデザイン、3列縦書き表示
   - リセットボタンで新しいカードセットを再配分
   - デバイスベース自動ユーザー識別（localStorage UUID）
+- **Content Pages** (AdSense申請用):
+  - 共通ヘッダー（サイト名 + 「練習する」ボタン）+ 共通フッター（全ページリンク）
+  - 使い方ページ（サイト説明、基本的な流れ、暗記練習、確認方法、便利機能）
+  - 暗記時間とはページ（競技かるたの暗記時間の解説、重要性、このサイトでできること）
+  - FAQページ（8つのQ&A形式）
+  - プライバシーポリシーページ（情報取得、アクセス解析、広告、Cookie、管理方針）
+  - お問い合わせページ（名前・メール・内容のフォーム、送信後完了メッセージ）
 - **Key files**:
-  - `src/pages/StartScreen.tsx` — スタート画面（ログイン・自動ログイン）
+  - `src/pages/StartScreen.tsx` — スタート画面（ログイン・自動ログイン）+ フッターナビ
   - `src/data/karuta.ts` — 百人一首100首のデータ、ランダム配分、グリッド配置
   - `src/data/placementMemory.ts` — デバイスID管理、サーバーAPI連携の学習配置システム
   - `src/pages/KarutaBoard.tsx` — メインゲームボード（ドラッグ&ドロップ対応）
-  - `src/index.css` — テーマとスタイル（畳風背景、緑枠カード）
+  - `src/pages/HowToUse.tsx` — 使い方ページ
+  - `src/pages/AboutMemorization.tsx` — 暗記時間とはページ
+  - `src/pages/FAQ.tsx` — よくある質問ページ
+  - `src/pages/PrivacyPolicy.tsx` — プライバシーポリシーページ
+  - `src/pages/Contact.tsx` — お問い合わせページ（フォーム送信 → /api/contact）
+  - `src/components/PageLayout.tsx` — コンテンツページ共通レイアウト
+  - `src/components/SiteFooter.tsx` — 共通フッターナビゲーション
+  - `src/index.css` — テーマとスタイル（畳風背景、緑枠カード、コンテンツページ）
 
 ### API Server (`artifacts/api-server`)
 
@@ -65,6 +79,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - `POST /api/placements` — 配置データを記録（selfGrid + opGrid + userId）
   - `GET /api/placements/model?field=self|opponent&userId=X` — 配置頻度モデル+隣接ペアデータ取得
   - `GET /api/ads/config` — AdSense設定（pubId, slot IDs）を返す
+  - `POST /api/contact` — お問い合わせフォーム送信（name, email, message → サーバーログに記録）
   - `GET /api/healthz` — ヘルスチェック
 - **Schema**:
   - `lib/db/src/schema/users.ts` — id (uuid), device_id (unique), google_id (nullable), display_name, created_at
