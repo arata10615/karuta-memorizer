@@ -2,6 +2,8 @@ const API_BASE = "/api";
 
 const DEVICE_ID_KEY = "karuta_device_id";
 const USER_ID_KEY = "karuta_user_id";
+const DISPLAY_NAME_KEY = "karuta_display_name";
+const GOOGLE_LINKED_KEY = "karuta_google_linked";
 
 function getDeviceId(): string {
   let deviceId = localStorage.getItem(DEVICE_ID_KEY);
@@ -46,6 +48,53 @@ export async function ensureUser(): Promise<string | null> {
 
 export function getUserId(): string | null {
   return cachedUserId || localStorage.getItem(USER_ID_KEY);
+}
+
+export function getDisplayName(): string | null {
+  return localStorage.getItem(DISPLAY_NAME_KEY);
+}
+
+export function isGoogleLinked(): boolean {
+  return localStorage.getItem(GOOGLE_LINKED_KEY) === "true";
+}
+
+export async function getGoogleClientId(): Promise<string | null> {
+  try {
+    const res = await fetch(`${API_BASE}/users/google-client-id`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.clientId || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function loginWithGoogle(credential: string): Promise<{
+  id: string;
+  displayName: string | null;
+} | null> {
+  try {
+    const deviceId = getDeviceId();
+    const res = await fetch(`${API_BASE}/users/google`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ credential, deviceId }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const user = data.user;
+    if (user?.id) {
+      localStorage.setItem(USER_ID_KEY, user.id);
+      cachedUserId = user.id;
+      if (user.displayName) localStorage.setItem(DISPLAY_NAME_KEY, user.displayName);
+      localStorage.setItem(GOOGLE_LINKED_KEY, "true");
+      return { id: user.id, displayName: user.displayName };
+    }
+    return null;
+  } catch (err) {
+    console.error("Failed to login with Google:", err);
+    return null;
+  }
 }
 
 let cachedSelfModel: Record<number, Record<string, number>> | null = null;
