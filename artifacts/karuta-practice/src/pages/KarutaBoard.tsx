@@ -401,7 +401,7 @@ export default function KarutaBoard() {
     const cols = splitTextIntoColumns(karuta.shimoHiragana);
     return (
       <div className="card-inner">
-        <div className="card-front" style={{ opacity: faceUp ? 1 : 0, pointerEvents: faceUp ? "auto" : "none" }}>
+        <div className="card-front" style={{ opacity: faceUp ? 1 : 0 }}>
           <div className="card-text-3col" translate="no">
             {cols.map((col, i) => (
               <span key={i} className="card-col">{col}</span>
@@ -409,7 +409,7 @@ export default function KarutaBoard() {
           </div>
           <span className="card-no">No.{karuta.id}</span>
         </div>
-        <div className="card-back" style={{ opacity: faceUp ? 0 : 1, pointerEvents: faceUp ? "none" : "auto" }}>
+        <div className="card-back" style={{ opacity: faceUp ? 0 : 1, pointerEvents: "none" }}>
           <span className="card-back-mon">百</span>
         </div>
       </div>
