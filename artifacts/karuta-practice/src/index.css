@@ -456,7 +456,7 @@
 }
 
 .card-col {
-  font-family: 'Yuji Syuku', 'Noto Serif JP', serif;
+  font-family: 'Noto Serif JP', serif;
   font-size: clamp(0.42rem, 1vw, 0.72rem);
   line-height: 1.32;
   color: #111;
@@ -467,7 +467,6 @@
   white-space: nowrap;
   text-align: center;
   font-weight: 400;
-  -webkit-text-stroke: 0.5px rgba(0,0,0,0.25);
   flex-shrink: 0;
 }
 
