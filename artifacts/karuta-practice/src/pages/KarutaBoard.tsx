@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
+import AdBanner from "@/components/AdBanner";
+import AdInterstitial from "@/components/AdInterstitial";
 import {
   ALL_CARDS,
   dealRandomCards,
@@ -49,6 +51,9 @@ export default function KarutaBoard() {
   const [faceUpMap, setFaceUpMap] = useState<Record<number, boolean>>({});
   const [dragState, setDragState] = useState<DragState | null>(null);
   const [selfAutoPlaced, setSelfAutoPlaced] = useState(false);
+  const [showInterstitial, setShowInterstitial] = useState(false);
+  const [adConfig, setAdConfig] = useState<{ sidebarSlot: string; interstitialSlot: string }>({ sidebarSlot: "", interstitialSlot: "" });
+  const resetCount = useRef(0);
   const [, navigate] = useLocation();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const reviewIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -74,7 +79,12 @@ export default function KarutaBoard() {
     dragRef.current = null;
   }, []);
 
-  useEffect(() => { initBoard(); }, [initBoard]);
+  useEffect(() => {
+    initBoard();
+    fetch("/api/ads/config").then(r => r.json()).then(d => {
+      setAdConfig({ sidebarSlot: d.sidebarSlot || "", interstitialSlot: d.interstitialSlot || "" });
+    }).catch(() => {});
+  }, [initBoard]);
 
   const placedCount = selfGrid.flat().filter((c) => c !== null).length;
   const allPlaced = placedCount === myCardCount.current;
@@ -378,6 +388,10 @@ export default function KarutaBoard() {
     cancelLongPress();
     if (cleanupDragListeners.current) cleanupDragListeners.current();
     dragRef.current = null;
+    resetCount.current += 1;
+    if (resetCount.current % 3 === 0) {
+      setShowInterstitial(true);
+    }
     initBoard();
   };
 
@@ -508,14 +522,19 @@ export default function KarutaBoard() {
   const dragCols = dragCard ? splitTextIntoColumns(dragCard.shimoHiragana) : [];
 
   return (
-    <div className="app-root">
-      <header className="app-header">
-        <div className="header-left">
-          <button className="btn btn-back" onClick={() => navigate("/")}>戻る</button>
-          <h1 className="app-title">競技かるた</h1>
-          <span className="app-subtitle">暗記練習</span>
-        </div>
-        <div className="header-controls">
+    <div className="app-root-with-ads">
+      <aside className="ad-sidebar ad-sidebar-left">
+        <AdBanner slot={adConfig.sidebarSlot} format="vertical" className="ad-sidebar-inner" style={{ display: "block", width: "160px", minHeight: "600px" }} />
+      </aside>
+
+      <div className="app-root">
+        <header className="app-header">
+          <div className="header-left">
+            <button className="btn btn-back" onClick={() => navigate("/")}>戻る</button>
+            <h1 className="app-title">競技かるた</h1>
+            <span className="app-subtitle">暗記練習</span>
+          </div>
+          <div className="header-controls">
           {gameState === "placing" && (
             <>
               <span className="place-counter">{placedCount}/{myCardCount.current}枚配置済み</span>
@@ -635,6 +654,18 @@ export default function KarutaBoard() {
             </div>
           </div>
         </div>
+      )}
+      </div>
+
+      <aside className="ad-sidebar ad-sidebar-right">
+        <AdBanner slot={adConfig.sidebarSlot} format="vertical" className="ad-sidebar-inner" style={{ display: "block", width: "160px", minHeight: "600px" }} />
+      </aside>
+
+      {showInterstitial && (
+        <AdInterstitial
+          slot={adConfig.interstitialSlot}
+          onClose={() => setShowInterstitial(false)}
+        />
       )}
     </div>
   );

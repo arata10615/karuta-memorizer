@@ -35,7 +35,8 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Purpose**: 競技かるた（百人一首）の暗記練習ウェブアプリ
 - **Routes**: `/` → スタート画面、`/game` → ゲームボード
 - **Features**:
-  - スタート画面（タイトル、スタートボタン、ログインボタン、自動ログインチェックボックス）
+  - スタート画面（タイトル、スタート、デバイスログイン、Googleログイン、自動ログイン、ログアウト）
+  - Google AdSense広告（左右サイドバー＋リセット3回ごとのインタースティシャル広告）
   - 100首からランダムに50枚を選出、敵25枚・自分25枚に分配
   - 敵陣は上下反転表示（相手目線）、左右に詰めて中央を開ける配置（下段10枚、中段8枚、上段7枚）
   - 自陣はタップまたは長押しドラッグで自由配置
@@ -63,6 +64,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - `POST /api/users/device` — デバイスIDでユーザー作成/取得
   - `POST /api/placements` — 配置データを記録（selfGrid + opGrid + userId）
   - `GET /api/placements/model?field=self|opponent&userId=X` — 配置頻度モデル+隣接ペアデータ取得
+  - `GET /api/ads/config` — AdSense設定（pubId, slot IDs）を返す
   - `GET /api/healthz` — ヘルスチェック
 - **Schema**:
   - `lib/db/src/schema/users.ts` — id (uuid), device_id (unique), google_id (nullable), display_name, created_at
