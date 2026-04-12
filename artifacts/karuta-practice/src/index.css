@@ -778,15 +778,15 @@
     gap: 1px;
   }
   .card-row {
-    height: 5.5vw;
+    height: 4.2vw;
   }
   .karuta-card {
-    height: 5.5vw;
+    height: 4.2vw;
   }
   .card-inner,
   .card-front,
   .card-back {
-    height: 5.5vw;
+    height: 4.2vw;
   }
   .card-front {
     padding: 0;
@@ -798,16 +798,16 @@
     align-items: center;
   }
   .card-col {
-    font-size: clamp(0.18rem, 0.7vw, 0.36rem);
+    font-size: clamp(0.14rem, 0.55vw, 0.3rem);
     line-height: 1.0;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.05em;
     flex-shrink: 1;
   }
   .card-no {
     display: none;
   }
   .card-slot.empty {
-    min-height: 5.5vw;
+    min-height: 4.2vw;
   }
   .row-label-box {
     width: 14px;
@@ -832,23 +832,23 @@
     margin-bottom: 1px;
   }
   .hand-card {
-    width: 4.5vw;
-    height: 5.5vw;
+    width: 3.5vw;
+    height: 4.2vw;
   }
   .hand-card .card-inner,
   .hand-card .card-front {
-    height: 5.5vw;
+    height: 4.2vw;
   }
   .hand-card .card-col {
-    font-size: clamp(0.14rem, 0.55vw, 0.28rem);
+    font-size: clamp(0.12rem, 0.45vw, 0.24rem);
   }
   .drag-ghost {
-    width: 5vw;
-    height: 5.5vw;
+    width: 4vw;
+    height: 4.2vw;
   }
   .drag-ghost .card-inner,
   .drag-ghost .card-front {
-    height: 5.5vw;
+    height: 4.2vw;
   }
   .card-slot .karuta-card {
     height: 100%;
