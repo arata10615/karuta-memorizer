@@ -8,6 +8,7 @@ export interface TeiichiPattern {
   patternName: string;
   isActive: boolean;
   cardPositions: Record<number, CardPosition>;
+  thumbnail?: string;
 }
 
 const STORAGE_KEY = "karuta_teiichi_patterns";
@@ -100,6 +101,54 @@ export function getActivePattern(): TeiichiPattern | null {
   return patterns.find((p) => p.isActive) || null;
 }
 
+export function generateThumbnail(
+  cardPositions: Record<number, CardPosition>
+): string {
+  const cellW = 6;
+  const cellH = 16;
+  const gap = 4;
+  const padding = 4;
+  const totalW = BLOCK_SIZE * cellW + gap + BLOCK_SIZE * cellW + padding * 2;
+  const totalH = TEIICHI_ROWS * cellH + (TEIICHI_ROWS - 1) * 2 + padding * 2;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = totalW;
+  canvas.height = totalH;
+  const ctx = canvas.getContext("2d")!;
+
+  ctx.fillStyle = "#f5f0e5";
+  ctx.fillRect(0, 0, totalW, totalH);
+
+  const occupied = new Set<string>();
+  for (const pos of Object.values(cardPositions)) {
+    occupied.add(`${pos.row},${pos.col}`);
+  }
+
+  for (let r = 0; r < TEIICHI_ROWS; r++) {
+    for (let c = 0; c < TEIICHI_COLS; c++) {
+      const block = c < BLOCK_SIZE ? "left" : "right";
+      const localCol = block === "left" ? c : c - BLOCK_SIZE;
+      const xOffset = block === "left" ? 0 : BLOCK_SIZE * cellW + gap;
+      const x = padding + xOffset + localCol * cellW;
+      const y = padding + r * (cellH + 2);
+
+      if (occupied.has(`${r},${c}`)) {
+        ctx.fillStyle = "#2e7d32";
+        ctx.fillRect(x, y, cellW - 1, cellH - 1);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(x + 1, y + 1, cellW - 3, cellH - 3);
+        ctx.fillStyle = "#2e7d32";
+        ctx.fillRect(x + 2, y + 3, cellW - 5, cellH - 7);
+      } else {
+        ctx.fillStyle = "#e0d8c8";
+        ctx.fillRect(x, y, cellW - 1, cellH - 1);
+      }
+    }
+  }
+
+  return canvas.toDataURL("image/png");
+}
+
 export function updateCardPositions(
   patternId: string,
   cardPositions: Record<number, CardPosition>
@@ -108,6 +157,7 @@ export function updateCardPositions(
   const p = patterns.find((pat) => pat.patternId === patternId);
   if (p) {
     p.cardPositions = cardPositions;
+    p.thumbnail = generateThumbnail(cardPositions);
     savePatterns(patterns);
   }
 }
@@ -117,6 +167,7 @@ export function clearAllCards(patternId: string): void {
   const p = patterns.find((pat) => pat.patternId === patternId);
   if (p) {
     p.cardPositions = {};
+    p.thumbnail = generateThumbnail({});
     savePatterns(patterns);
   }
 }

@@ -1688,10 +1688,20 @@
   border-left: 3px solid #1e448a;
 }
 
+.teiichi-pattern-thumbnail {
+  width: 160px;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid #d4c8a8;
+  flex-shrink: 0;
+  image-rendering: pixelated;
+}
+
 .teiichi-pattern-info {
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   flex: 1;
   min-width: 0;
 }
@@ -2002,6 +2012,9 @@
   }
   .teiichi-pattern-item {
     padding: 8px 10px;
+  }
+  .teiichi-pattern-thumbnail {
+    width: 120px;
   }
   .teiichi-pattern-name {
     font-size: 0.82rem;

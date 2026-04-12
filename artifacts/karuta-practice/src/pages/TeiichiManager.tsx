@@ -13,6 +13,7 @@ import {
   setActivePattern,
   updateCardPositions,
   clearAllCards,
+  generateThumbnail,
   TEIICHI_ROWS,
   TEIICHI_COLS,
   BLOCK_SIZE,
@@ -36,6 +37,16 @@ export default function TeiichiManager() {
 
   const refreshPatterns = useCallback(() => {
     const p = loadPatterns();
+    let needsSave = false;
+    for (const pat of p) {
+      if (!pat.thumbnail && Object.keys(pat.cardPositions).length > 0) {
+        pat.thumbnail = generateThumbnail(pat.cardPositions);
+        needsSave = true;
+      }
+    }
+    if (needsSave) {
+      localStorage.setItem("karuta_teiichi_patterns", JSON.stringify(p));
+    }
     setPatterns(p);
     return p;
   }, []);
@@ -254,6 +265,13 @@ export default function TeiichiManager() {
                 className={`teiichi-pattern-item ${selectedPatternId === p.patternId ? "selected" : ""} ${p.isActive ? "active" : ""}`}
                 onClick={() => selectPattern(p)}
               >
+                {p.thumbnail && (
+                  <img
+                    src={p.thumbnail}
+                    alt={`${p.patternName}のサムネイル`}
+                    className="teiichi-pattern-thumbnail"
+                  />
+                )}
                 <div className="teiichi-pattern-info">
                   {editingNameId === p.patternId ? (
                     <input
