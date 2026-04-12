@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         <ul className="page-list">
           <li>デバイスを識別するためのランダムなID（ブラウザのローカルストレージに保存されます）</li>
           <li>Googleアカウントと連携した場合の表示名・GoogleアカウントID</li>
-          <li>かるた札の配置に関する操作データ（自動配置の学習に使用します）</li>
+          <li>かるた札の配置に関する操作データ（相手陣の配置パターン生成に使用します）</li>
           <li>お問い合わせフォームで入力された名前・メールアドレス・お問い合わせ内容</li>
         </ul>
       </section>

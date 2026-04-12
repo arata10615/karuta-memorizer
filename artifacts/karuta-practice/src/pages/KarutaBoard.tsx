@@ -7,12 +7,11 @@ import {
   dealRandomCards,
   GRID_COLS,
   GRID_ROWS,
-  placeCardsInGrid,
   splitTextIntoColumns,
 } from "@/data/karuta";
 import {
   recordPlacement,
-  smartAutoPlace,
+  generateOpponentGrid,
 } from "@/data/placementMemory";
 import {
   getActivePattern,
@@ -68,10 +67,12 @@ export default function KarutaBoard() {
 
   const myCardCount = useRef(25);
 
-  const initBoard = useCallback(() => {
+  const initBoard = useCallback(async () => {
     const { myCards, opCards } = dealRandomCards();
     myCardCount.current = myCards.length;
-    setOpGrid(placeCardsInGrid(opCards));
+    const rowCounts = [10, 8, 7];
+    const opponentGrid = await generateOpponentGrid(opCards, GRID_ROWS, GRID_COLS, rowCounts);
+    setOpGrid(opponentGrid);
     setSelfGrid(createEmptyGrid());
     setHandCards([...myCards]);
     setSelectedCard(null);
@@ -378,19 +379,6 @@ export default function KarutaBoard() {
         return;
       }
     }
-
-    const newGrid = await smartAutoPlace(
-      handCards,
-      selfGrid,
-      GRID_ROWS,
-      GRID_COLS,
-      rowCounts,
-      "self"
-    );
-    setSelfGrid(newGrid);
-    setHandCards([]);
-    setSelectedCard(null);
-    setSelfAutoPlaced(true);
   };
 
   const startMemorizing = () => {

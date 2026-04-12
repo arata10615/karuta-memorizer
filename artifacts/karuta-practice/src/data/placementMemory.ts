@@ -104,9 +104,7 @@ export async function loginWithGoogle(credential: string): Promise<{
   }
 }
 
-let cachedSelfModel: Record<number, Record<string, number>> | null = null;
 let cachedGlobalModel: Record<number, Record<string, number>> | null = null;
-let cachedSelfPairs: { cardA: number; cardB: number; count: number }[] | null = null;
 let cachedGlobalPairs: { cardA: number; cardB: number; count: number }[] | null = null;
 
 export async function recordPlacement(
@@ -122,9 +120,7 @@ export async function recordPlacement(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(body),
     });
-    cachedSelfModel = null;
     cachedGlobalModel = null;
-    cachedSelfPairs = null;
     cachedGlobalPairs = null;
   } catch (err) {
     console.error("Failed to record placement:", err);
@@ -137,10 +133,9 @@ interface PlacementModel {
   totalSessions: number;
 }
 
-async function fetchModel(field: string, userId?: string | null): Promise<PlacementModel> {
+async function fetchModel(field: string): Promise<PlacementModel> {
   try {
     const params = new URLSearchParams({ field });
-    if (userId) params.set("userId", userId);
     const res = await fetch(`${API_BASE}/placements/model?${params}`);
     if (!res.ok) return { model: {}, pairs: [], totalSessions: 0 };
     return await res.json();
@@ -150,54 +145,31 @@ async function fetchModel(field: string, userId?: string | null): Promise<Placem
   }
 }
 
-export async function smartAutoPlace(
+export async function generateOpponentGrid(
   cardIds: number[],
-  existingGrid: (number | null)[][],
   gridRows: number,
   gridCols: number,
-  rowCounts: number[],
-  mode: "self" | "opponent"
+  rowCounts: number[]
 ): Promise<(number | null)[][]> {
-  const grid = existingGrid.map((r) => [...r]);
+  const grid: (number | null)[][] = Array.from({ length: gridRows }, () =>
+    Array.from({ length: gridCols }, () => null)
+  );
 
-  const alreadyPlaced = new Set<number>();
-  for (let r = 0; r < gridRows; r++) {
-    for (let c = 0; c < gridCols; c++) {
-      if (grid[r][c] !== null) alreadyPlaced.add(grid[r][c]!);
-    }
+  if (!cachedGlobalModel) {
+    const modelData = await fetchModel("self");
+    cachedGlobalModel = modelData.model;
+    cachedGlobalPairs = modelData.pairs;
   }
 
-  const remaining = cardIds.filter((id) => !alreadyPlaced.has(id));
-  if (remaining.length === 0) return grid;
-
-  let modelData: PlacementModel;
-  if (mode === "self") {
-    const userId = getUserId();
-    if (!cachedSelfModel) {
-      modelData = await fetchModel("self", userId);
-      cachedSelfModel = modelData.model;
-      cachedSelfPairs = modelData.pairs;
-    } else {
-      modelData = { model: cachedSelfModel, pairs: cachedSelfPairs || [], totalSessions: 0 };
-    }
-  } else {
-    if (!cachedGlobalModel) {
-      modelData = await fetchModel("self");
-      cachedGlobalModel = modelData.model;
-      cachedGlobalPairs = modelData.pairs;
-    } else {
-      modelData = { model: cachedGlobalModel, pairs: cachedGlobalPairs || [], totalSessions: 0 };
-    }
-  }
-
-  const { model, pairs } = modelData;
+  const model = cachedGlobalModel;
+  const pairs = cachedGlobalPairs || [];
   const hasData = Object.keys(model).length > 0;
 
   if (!hasData) {
-    return fallbackPlace(remaining, grid, gridRows, gridCols, rowCounts);
+    return fallbackPlace([...cardIds], grid, gridRows, gridCols, rowCounts);
   }
 
-  return patternPlace(remaining, grid, gridRows, gridCols, rowCounts, model, pairs);
+  return patternPlace([...cardIds], grid, gridRows, gridCols, rowCounts, model, pairs);
 }
 
 function patternPlace(
@@ -289,11 +261,11 @@ function fallbackPlace(
   gridCols: number,
   rowCounts: number[]
 ): (number | null)[][] {
-  const cards = [...remaining];
-  for (let r = 0; r < gridRows && cards.length > 0; r++) {
+  const shuffled = [...remaining].sort(() => Math.random() - 0.5);
+  for (let r = 0; r < gridRows && shuffled.length > 0; r++) {
     const existing = grid[r].filter((c) => c !== null).length;
     const maxForRow = rowCounts[r] || gridCols;
-    const need = Math.min(maxForRow - existing, cards.length);
+    const need = Math.min(maxForRow - existing, shuffled.length);
     if (need <= 0) continue;
 
     const leftCount = Math.ceil(need / 2);
@@ -302,14 +274,14 @@ function fallbackPlace(
     let placed = 0;
     for (let c = 0; c < gridCols && placed < leftCount; c++) {
       if (grid[r][c] === null) {
-        grid[r][c] = cards.shift()!;
+        grid[r][c] = shuffled.shift()!;
         placed++;
       }
     }
     placed = 0;
     for (let c = 0; c < gridCols && placed < rightCount; c++) {
       if (grid[r][gridCols - 1 - c] === null) {
-        grid[r][gridCols - 1 - c] = cards.shift()!;
+        grid[r][gridCols - 1 - c] = shuffled.shift()!;
         placed++;
       }
     }

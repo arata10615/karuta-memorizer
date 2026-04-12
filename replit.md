@@ -41,7 +41,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - 敵陣は上下反転表示（相手目線）、左右に詰めて中央を開ける配置（下段10枚、中段8枚、上段7枚）
   - 自陣はタップまたは長押しドラッグで自由配置
   - 敵陣も長押しドラッグで同じフィールド内のカード移動・スワップ可能
-  - 自動配置ボタン（学習データがある場合はパターンベース配置、なければフォールバック配置）
+  - 自動配置ボタン（定位置パターンに基づく配置のみ、サーバー学習は使用しない）
   - 「暗記開始」でタイマー計測開始（自陣+敵陣の配置データをDBに記録）
   - 「ストップ」で全札を裏向きに
   - 裏向きの状態でタップすると1枚ずつ確認できる
@@ -58,7 +58,7 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **Key files**:
   - `src/pages/StartScreen.tsx` — スタート画面（ログイン・自動ログイン）+ フッターナビ
   - `src/data/karuta.ts` — 百人一首100首のデータ、ランダム配分、グリッド配置
-  - `src/data/placementMemory.ts` — デバイスID管理、サーバーAPI連携の学習配置システム
+  - `src/data/placementMemory.ts` — デバイスID管理、サーバーAPI連携、敵陣パターン生成
   - `src/data/teiichiPattern.ts` — 定位置パターンのlocalStorage CRUD・優先順計算・自動配置ロジック
   - `src/pages/TeiichiManager.tsx` — 定位置管理画面（パターン一覧・150マス盤面・札配置UI）
   - `src/pages/KarutaBoard.tsx` — メインゲームボード（ドラッグ&ドロップ対応、定位置パターン自動配置）
@@ -87,12 +87,11 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
   - `lib/db/src/schema/users.ts` — id (uuid), device_id (unique), google_id (nullable), display_name, created_at
   - `lib/db/src/schema/placements.ts` — id, user_id (FK→users), field ('self'|'opponent'), card_id, row, col, session_id, created_at
 
-## Smart Auto-Placement System
+## 配置システム
 
-- **自陣**: 個人の配置履歴（userId + field=self）から学習。位置頻度 + 隣接ペア頻度でスコアリング
-- **敵陣**: 全ユーザーの配置履歴（field=self、userId指定なし）から学習。将来的にfield=opponentも活用予定
-- **フォールバック**: データなしの場合は左右端から詰める基本配置
-- **将来計画**: Google OAuth連携でクロスデバイス永続化
+- **自陣の自動配置**: 定位置パターン（localStorage）のみ使用。サーバー学習は使わない
+- **敵陣の初期配置**: 全ユーザーの配置データ（サーバー、field=self、userId指定なし）をもとにパターン生成。データが蓄積されるほどリアルな配置に
+- **フォールバック**: サーバーにデータがない場合はランダム配置
 
 ## 定位置パターンシステム
 
@@ -101,4 +100,4 @@ See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and pa
 - **優先順**: 左ブロックは左端（外側）→右方向、右ブロックは右端（外側）→左方向
 - **パターン管理**: 最大10個まで保存、名前編集・削除・適用中切替
 - **自動配置連携**: ゲームの自動配置ボタンで適用中パターンに基づき自陣25枚を優先順配置
-- **フォールバック**: パターン未設定時は既存の学習ベース自動配置を使用
+- **フォールバック**: パターン未設定時は自動配置ボタンは何もしない（手動配置のみ）
