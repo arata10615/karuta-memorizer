@@ -7,6 +7,7 @@ import {
   isGoogleLinked,
   getGoogleClientId,
   loginWithGoogle,
+  logout as doLogout,
 } from "@/data/placementMemory";
 
 declare global {
@@ -34,7 +35,7 @@ const AUTO_LOGIN_KEY = "karuta_auto_login";
 
 export default function StartScreen() {
   const [, navigate] = useLocation();
-  const [autoLogin, setAutoLogin] = useState(false);
+  const [autoLogin, setAutoLogin] = useState(() => localStorage.getItem(AUTO_LOGIN_KEY) === "true");
   const [loggedIn, setLoggedIn] = useState(false);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [googleLinked, setGoogleLinked] = useState(false);
@@ -43,25 +44,30 @@ export default function StartScreen() {
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const gsiInitialized = useRef(false);
 
-  useEffect(() => {
-    const saved = localStorage.getItem(AUTO_LOGIN_KEY);
-    if (saved === "true") {
-      setAutoLogin(true);
+  const syncLoginState = () => {
+    const uid = getUserId();
+    if (uid) {
+      setLoggedIn(true);
+      setDisplayName(getDisplayName());
+      setGoogleLinked(isGoogleLinked());
     }
+  };
 
-    getGoogleClientId().then((id) => {
-      setGoogleClientId(id);
-    });
+  useEffect(() => {
+    getGoogleClientId().then((id) => setGoogleClientId(id));
 
-    if (saved === "true") {
+    const isAutoLogin = localStorage.getItem(AUTO_LOGIN_KEY) === "true";
+
+    if (isAutoLogin) {
       const existingUserId = getUserId();
       if (existingUserId) {
-        setLoggedIn(true);
-        setDisplayName(getDisplayName());
-        setGoogleLinked(isGoogleLinked());
+        syncLoginState();
         setLoading(false);
       } else {
-        doDeviceLogin().then(() => setLoading(false));
+        ensureUser().then(() => {
+          syncLoginState();
+          setLoading(false);
+        });
       }
     } else {
       setLoading(false);
@@ -74,11 +80,10 @@ export default function StartScreen() {
       setLoggedIn(true);
       setDisplayName(user.displayName);
       setGoogleLinked(true);
-      if (autoLogin) {
-        localStorage.setItem(AUTO_LOGIN_KEY, "true");
-      }
+      localStorage.setItem(AUTO_LOGIN_KEY, "true");
+      setAutoLogin(true);
     }
-  }, [autoLogin]);
+  }, []);
 
   useEffect(() => {
     if (!googleClientId || gsiInitialized.current) return;
@@ -109,30 +114,33 @@ export default function StartScreen() {
     }
   }, [googleClientId, loggedIn, googleLinked, handleGoogleCallback]);
 
-  async function doDeviceLogin() {
+  const handleDeviceLogin = async () => {
     const userId = await ensureUser();
     if (userId) {
-      setLoggedIn(true);
-      setDisplayName(getDisplayName());
-      setGoogleLinked(isGoogleLinked());
-    }
-  }
-
-  const handleDeviceLogin = async () => {
-    await doDeviceLogin();
-    if (autoLogin) {
+      syncLoginState();
       localStorage.setItem(AUTO_LOGIN_KEY, "true");
+      setAutoLogin(true);
     }
   };
 
   const handleAutoLoginToggle = () => {
     const next = !autoLogin;
     setAutoLogin(next);
-    if (!next) {
-      localStorage.removeItem(AUTO_LOGIN_KEY);
-    } else if (loggedIn) {
+    if (next && loggedIn) {
       localStorage.setItem(AUTO_LOGIN_KEY, "true");
+    } else if (!next) {
+      localStorage.removeItem(AUTO_LOGIN_KEY);
     }
+  };
+
+  const handleLogout = () => {
+    doLogout();
+    localStorage.removeItem(AUTO_LOGIN_KEY);
+    setLoggedIn(false);
+    setDisplayName(null);
+    setGoogleLinked(false);
+    setAutoLogin(false);
+    gsiInitialized.current = false;
   };
 
   const handleStart = () => {
@@ -152,41 +160,50 @@ export default function StartScreen() {
             スタート
           </button>
 
-          {!loggedIn && (
-            <button className="start-btn start-btn-login" onClick={handleDeviceLogin}>
-              ログイン（デバイス）
-            </button>
-          )}
+          {!loggedIn ? (
+            <>
+              <button className="start-btn start-btn-login" onClick={handleDeviceLogin}>
+                ログイン（デバイス）
+              </button>
+              <div className="google-login-area">
+                {googleClientId ? (
+                  <div ref={googleBtnRef} className="google-btn-container" />
+                ) : (
+                  <p className="google-not-configured">Google ログイン未設定</p>
+                )}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="login-status-area">
+                <p className="login-status">
+                  {googleLinked ? "Google連携済み" : "デバイスログイン済み"}
+                </p>
+                {displayName && <p className="login-name">{displayName}</p>}
+              </div>
 
-          {!loggedIn || !googleLinked ? (
-            <div className="google-login-area">
-              {googleClientId ? (
-                <div ref={googleBtnRef} className="google-btn-container" />
-              ) : (
-                <p className="google-not-configured">Google ログイン未設定</p>
+              {!googleLinked && googleClientId && (
+                <div className="google-login-area">
+                  <div ref={googleBtnRef} className="google-btn-container" />
+                </div>
               )}
-            </div>
-          ) : null}
+
+              <button className="start-btn start-btn-logout" onClick={handleLogout}>
+                ログアウト
+              </button>
+            </>
+          )}
         </div>
 
-        <label className="auto-login-label">
-          <input
-            type="checkbox"
-            checked={autoLogin}
-            onChange={handleAutoLoginToggle}
-          />
-          <span>自動ログイン</span>
-        </label>
-
         {loggedIn && (
-          <div className="login-status-area">
-            <p className="login-status">
-              {googleLinked ? "Google連携済み" : "デバイスログイン済み"}
-            </p>
-            {displayName && (
-              <p className="login-name">{displayName}</p>
-            )}
-          </div>
+          <label className="auto-login-label">
+            <input
+              type="checkbox"
+              checked={autoLogin}
+              onChange={handleAutoLoginToggle}
+            />
+            <span>自動ログイン</span>
+          </label>
         )}
       </div>
     </div>

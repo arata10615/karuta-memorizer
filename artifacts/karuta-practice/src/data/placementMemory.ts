@@ -58,6 +58,13 @@ export function isGoogleLinked(): boolean {
   return localStorage.getItem(GOOGLE_LINKED_KEY) === "true";
 }
 
+export function logout() {
+  localStorage.removeItem(USER_ID_KEY);
+  localStorage.removeItem(DISPLAY_NAME_KEY);
+  localStorage.removeItem(GOOGLE_LINKED_KEY);
+  cachedUserId = null;
+}
+
 export async function getGoogleClientId(): Promise<string | null> {
   try {
     const res = await fetch(`${API_BASE}/users/google-client-id`);

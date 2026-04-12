@@ -1000,7 +1000,7 @@
 }
 
 .login-status-area {
-  margin-top: 14px;
+  margin-top: 4px;
 }
 
 .login-status {
@@ -1014,6 +1014,18 @@
   color: rgba(255,255,255,0.9);
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+.start-btn-logout {
+  background: rgba(180,60,60,0.3);
+  color: rgba(255,200,200,0.85);
+  border: 1px solid rgba(200,100,100,0.35);
+  font-size: 0.95rem;
+  padding: 10px 32px;
+}
+
+.start-btn-logout:hover {
+  background: rgba(180,60,60,0.45);
 }
 
 /* ===========================================
