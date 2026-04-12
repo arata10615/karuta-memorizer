@@ -805,11 +805,11 @@
     overflow: hidden;
   }
   .card-col {
-    font-size: 1.15vw;
-    line-height: 1.0;
-    letter-spacing: -0.06em;
+    font-size: 1.1vw;
+    line-height: 1.05;
+    letter-spacing: 0em;
     flex-shrink: 1;
-    overflow: hidden;
+    overflow: visible;
   }
   .card-no {
     display: none;
