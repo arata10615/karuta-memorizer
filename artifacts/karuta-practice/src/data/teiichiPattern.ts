@@ -190,27 +190,43 @@ export function autoPlaceWithTeiichi(
 
   let li = 0;
   let ri = 0;
-  let ui = 0;
+
+  const leftSlots: { r: number; c: number }[] = [];
+  const rightSlots: { r: number; c: number }[] = [];
 
   for (let r = 0; r < gridRows; r++) {
     const count = rowCounts[r];
-    const leftCount = Math.ceil(count / 2);
-    const rightCount = count - leftCount;
+    const lc = Math.ceil(count / 2);
+    const rc = count - lc;
+    for (let c = 0; c < lc; c++) leftSlots.push({ r, c });
+    for (let c = 0; c < rc; c++) rightSlots.push({ r, c: gridCols - 1 - c });
+  }
 
-    for (let c = 0; c < leftCount; c++) {
-      if (li < leftCards.length) {
-        grid[r][c] = leftCards[li++].id;
-      } else if (ui < unpositioned.length) {
-        grid[r][c] = unpositioned[ui++];
-      }
-    }
-    for (let c = 0; c < rightCount; c++) {
-      if (ri < rightCards.length) {
-        grid[r][gridCols - 1 - c] = rightCards[ri++].id;
-      } else if (ui < unpositioned.length) {
-        grid[r][gridCols - 1 - c] = unpositioned[ui++];
-      }
-    }
+  let lsi = 0;
+  let rsi = 0;
+
+  for (; li < leftCards.length && lsi < leftSlots.length; li++, lsi++) {
+    const s = leftSlots[lsi];
+    grid[s.r][s.c] = leftCards[li].id;
+  }
+  for (; ri < rightCards.length && rsi < rightSlots.length; ri++, rsi++) {
+    const s = rightSlots[rsi];
+    grid[s.r][s.c] = rightCards[ri].id;
+  }
+
+  const overflow: number[] = [];
+  for (; li < leftCards.length; li++) overflow.push(leftCards[li].id);
+  for (; ri < rightCards.length; ri++) overflow.push(rightCards[ri].id);
+  overflow.push(...unpositioned);
+
+  let oi = 0;
+  for (; lsi < leftSlots.length && oi < overflow.length; lsi++, oi++) {
+    const s = leftSlots[lsi];
+    grid[s.r][s.c] = overflow[oi];
+  }
+  for (; rsi < rightSlots.length && oi < overflow.length; rsi++, oi++) {
+    const s = rightSlots[rsi];
+    grid[s.r][s.c] = overflow[oi];
   }
 
   return grid;
