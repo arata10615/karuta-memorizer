@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;700&family=Noto+Sans+JP:wght@400;500;700&family=Yuji+Syuku&display=block');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -713,6 +712,140 @@
   z-index: 50;
 }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+/* ===========================================
+   RESPONSIVE: PC wide screen
+   =========================================== */
+@media (min-width: 1500px) {
+  .board-area {
+    max-width: 1100px;
+  }
+}
+
+/* ===========================================
+   RESPONSIVE: Mobile landscape
+   =========================================== */
+@media (max-height: 500px) and (orientation: landscape) {
+  .app-header {
+    padding: 2px 10px;
+    min-height: auto;
+  }
+  .app-title { font-size: 0.9rem; }
+  .app-subtitle { font-size: 0.42rem; }
+  .btn { font-size: 0.62rem; padding: 3px 10px; }
+  .btn-auto { font-size: 0.62rem; padding: 3px 8px; }
+  .place-counter { font-size: 0.55rem; }
+  .timer-value { font-size: 0.9rem; }
+  .timer-label { font-size: 0.38rem; }
+
+  .board-main {
+    padding: 2px 4px 2px;
+  }
+  .board-area {
+    min-width: 500px;
+  }
+  .field-wrap {
+    padding: 2px 0 2px 2px;
+  }
+  .field-name-vertical {
+    font-size: 0.42rem;
+    padding: 1px 2px 1px 3px;
+    border-left-width: 2px;
+  }
+  .field-rows {
+    gap: 1px;
+  }
+  .card-row {
+    height: 12vh;
+  }
+  .karuta-card {
+    height: 12vh;
+  }
+  .card-inner,
+  .card-front,
+  .card-back {
+    height: 12vh;
+  }
+  .card-front {
+    padding: 1px 0 0;
+    border-width: 1.5px;
+  }
+  .card-text-3col {
+    gap: 0;
+  }
+  .card-col {
+    font-size: clamp(0.24rem, 1.6vh, 0.42rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    flex-shrink: 1;
+  }
+  .card-no {
+    display: none;
+  }
+  .card-slot.empty {
+    min-height: 12vh;
+  }
+  .row-label-box {
+    width: 18px;
+    padding: 0 1px;
+  }
+  .row-label {
+    font-size: 0.38rem;
+  }
+  .center-gap {
+    padding: 1px 0;
+    gap: 4px;
+  }
+  .center-text {
+    font-size: 0.38rem;
+  }
+  .hand-area {
+    padding: 3px 5px 5px;
+    margin-top: 2px;
+  }
+  .hand-label {
+    font-size: 0.42rem;
+    margin-bottom: 2px;
+  }
+  .hand-card {
+    width: 30px;
+    height: 12vh;
+  }
+  .hand-card .card-inner,
+  .hand-card .card-front {
+    height: 12vh;
+  }
+  .hand-card .card-col {
+    font-size: clamp(0.2rem, 1.2vh, 0.3rem);
+  }
+  .drag-ghost {
+    width: 34px;
+    height: 12vh;
+  }
+  .drag-ghost .card-inner,
+  .drag-ghost .card-front {
+    height: 12vh;
+  }
+  .card-slot .karuta-card {
+    height: 100%;
+  }
+  .card-slot .karuta-card .card-inner,
+  .card-slot .karuta-card .card-front,
+  .card-slot .karuta-card .card-back {
+    height: 100%;
+  }
+  .card-back-mon {
+    font-size: clamp(0.6rem, 1.2vw, 1rem);
+  }
+  .memo-toast {
+    bottom: 6px;
+    font-size: 0.58rem;
+    padding: 4px 14px;
+  }
+  .flip-hint {
+    font-size: 0.5rem;
+  }
+}
 
 /* ===========================================
    UTILITY LAYER (shadcn compat)
