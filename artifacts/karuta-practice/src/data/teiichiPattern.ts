@@ -161,72 +161,87 @@ export function autoPlaceWithTeiichi(
   cardIds: number[],
   pattern: TeiichiPattern,
   gridRows: number,
-  gridCols: number,
-  rowCounts: number[]
+  gridCols: number
 ): (number | null)[][] {
   const grid: (number | null)[][] = Array.from({ length: gridRows }, () =>
     Array.from({ length: gridCols }, () => null)
   );
 
-  const leftCards: { id: number; row: number; col: number }[] = [];
-  const rightCards: { id: number; row: number; col: number }[] = [];
+  const grouped = Array.from({ length: gridRows }, () => ({
+    left: [] as { id: number; priority: number }[],
+    right: [] as { id: number; priority: number }[],
+  }));
+
   const unpositioned: number[] = [];
+  const overflow: number[] = [];
 
   for (const id of cardIds) {
     const pos = pattern.cardPositions[id];
-    if (pos !== undefined) {
-      if (getBlockIndex(pos.col) === "left") {
-        leftCards.push({ id, row: pos.row, col: pos.col });
-      } else {
-        rightCards.push({ id, row: pos.row, col: TEIICHI_COLS - 1 - pos.col });
-      }
-    } else {
+
+    if (pos === undefined || pos.row < 0 || pos.row >= gridRows) {
       unpositioned.push(id);
+      continue;
+    }
+
+    if (getBlockIndex(pos.col) === "left") {
+      grouped[pos.row].left.push({
+        id,
+        priority: pos.col, // 左端に近いほど強い
+      });
+    } else {
+      grouped[pos.row].right.push({
+        id,
+        priority: TEIICHI_COLS - 1 - pos.col, // 右端に近いほど強い
+      });
     }
   }
 
-  leftCards.sort((a, b) => a.row * BLOCK_SIZE + a.col - (b.row * BLOCK_SIZE + b.col));
-  rightCards.sort((a, b) => a.row * BLOCK_SIZE + a.col - (b.row * BLOCK_SIZE + b.col));
+  for (let row = 0; row < gridRows; row++) {
+    const leftCards = [...grouped[row].left].sort(
+      (a, b) => a.priority - b.priority
+    );
+    const rightCards = [...grouped[row].right].sort(
+      (a, b) => a.priority - b.priority
+    );
 
-  let li = 0;
-  let ri = 0;
+    // 1段16枚を超えるぶんは、弱い札から overflow に回す
+    while (leftCards.length + rightCards.length > gridCols) {
+      const leftWeakest = leftCards[leftCards.length - 1];
+      const rightWeakest = rightCards[rightCards.length - 1];
 
-  const leftSlots: { r: number; c: number }[] = [];
-  const rightSlots: { r: number; c: number }[] = [];
+      if (!rightWeakest) {
+        overflow.push(leftCards.pop()!.id);
+      } else if (!leftWeakest) {
+        overflow.push(rightCards.pop()!.id);
+      } else if (leftWeakest.priority > rightWeakest.priority) {
+        overflow.push(leftCards.pop()!.id);
+      } else {
+        overflow.push(rightCards.pop()!.id);
+      }
+    }
 
-  for (let r = 0; r < gridRows; r++) {
-    const count = rowCounts[r];
-    const lc = Math.ceil(count / 2);
-    const rc = count - lc;
-    for (let c = 0; c < lc; c++) leftSlots.push({ r, c });
-    for (let c = 0; c < rc; c++) rightSlots.push({ r, c: gridCols - 1 - c });
+    // 左チャンクは左詰め
+    for (let i = 0; i < leftCards.length; i++) {
+      grid[row][i] = leftCards[i].id;
+    }
+
+    // 右チャンクは右詰め
+    for (let i = 0; i < rightCards.length; i++) {
+      grid[row][gridCols - 1 - i] = rightCards[i].id;
+    }
   }
 
-  let lsi = 0;
-  let rsi = 0;
+  // あふれた札 + 定位置未設定の札は、空いている場所に順番に入れる
+  const fillQueue = [...overflow, ...unpositioned];
+  let queueIndex = 0;
 
-  for (; li < leftCards.length && lsi < leftSlots.length; li++, lsi++) {
-    const s = leftSlots[lsi];
-    grid[s.r][s.c] = leftCards[li].id;
-  }
-  for (; ri < rightCards.length && rsi < rightSlots.length; ri++, rsi++) {
-    const s = rightSlots[rsi];
-    grid[s.r][s.c] = rightCards[ri].id;
-  }
-
-  const overflow: number[] = [];
-  for (; li < leftCards.length; li++) overflow.push(leftCards[li].id);
-  for (; ri < rightCards.length; ri++) overflow.push(rightCards[ri].id);
-  overflow.push(...unpositioned);
-
-  let oi = 0;
-  for (; lsi < leftSlots.length && oi < overflow.length; lsi++, oi++) {
-    const s = leftSlots[lsi];
-    grid[s.r][s.c] = overflow[oi];
-  }
-  for (; rsi < rightSlots.length && oi < overflow.length; rsi++, oi++) {
-    const s = rightSlots[rsi];
-    grid[s.r][s.c] = overflow[oi];
+  for (let row = 0; row < gridRows; row++) {
+    for (let col = 0; col < gridCols; col++) {
+      if (grid[row][col] === null && queueIndex < fillQueue.length) {
+        grid[row][col] = fillQueue[queueIndex];
+        queueIndex++;
+      }
+    }
   }
 
   return grid;
