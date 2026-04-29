@@ -17,6 +17,7 @@ import {
   TEIICHI_COLS,
   BLOCK_SIZE,
   CardPosition,
+  syncPatternsFromServer,
 } from "@/data/teiichiPattern";
 
 export default function TeiichiManager() {
@@ -43,13 +44,25 @@ export default function TeiichiManager() {
     return p;
   }, []);
 
-  useEffect(() => {
-    const p = refreshPatterns();
+ useEffect(() => {
+  let alive = true;
+
+  (async () => {
+    const p = await syncPatternsFromServer();
+    if (!alive) return;
+
+    setPatterns(p);
+
     if (p.length > 0) {
       const active = p.find((pat) => pat.isActive) || p[0];
       selectPattern(active);
     }
-  }, []);
+  })();
+
+  return () => {
+    alive = false;
+  };
+}, []);
 
   const selectPattern = (pattern: TeiichiPattern) => {
     if (hasUnsavedChanges) {
