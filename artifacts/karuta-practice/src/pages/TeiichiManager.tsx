@@ -7,6 +7,7 @@ import {
 import {
   TeiichiPattern,
   loadPatterns,
+  savePatternsToServer,
   createPattern,
   deletePattern,
   renamePattern,
@@ -18,6 +19,7 @@ import {
   BLOCK_SIZE,
   CardPosition,
 } from "@/data/teiichiPattern";
+import { getUserId, isGoogleLinked } from "@/data/placementMemory";
 
 export default function TeiichiManager() {
   const [, navigate] = useLocation();
@@ -31,6 +33,7 @@ export default function TeiichiManager() {
   const [showFullscreen, setShowFullscreen] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [savedPositions, setSavedPositions] = useState<Record<number, CardPosition>>({});
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
   function createEmptyBoard(): (number | null)[][] {
     return Array.from({ length: TEIICHI_ROWS }, () =>
       Array.from({ length: TEIICHI_COLS }, () => null)
@@ -43,12 +46,48 @@ export default function TeiichiManager() {
     return p;
   }, []);
 
-  useEffect(() => {
-    const p = refreshPatterns();
-    if (p.length > 0) {
-      const active = p.find((pat) => pat.isActive) || p[0];
-      selectPattern(active);
+  const syncCurrentPatternsToServer = useCallback(async (nextPatterns?: TeiichiPattern[]) => {
+    const userId = getUserId();
+    if (!userId || !isGoogleLinked()) return true;
+    const payload = nextPatterns ?? loadPatterns();
+    const ok = await savePatternsToServer(userId, payload);
+    setSyncMessage(ok ? "Googleに同期しました" : "Google同期に失敗しました");
+    return ok;
+  }, []);
+
+  const fetchPatternsFromServer = useCallback(async () => {
+    const userId = getUserId();
+    if (!userId || !isGoogleLinked()) return null;
+    try {
+      const res = await fetch(`/api/teiichi-patterns?userId=${encodeURIComponent(userId)}`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      if (!Array.isArray(data.patterns)) return null;
+      return data.patterns as TeiichiPattern[];
+    } catch {
+      return null;
     }
+  }, []);
+
+  useEffect(() => {
+    const init = async () => {
+      const userId = getUserId();
+      if (userId && isGoogleLinked()) {
+        const synced = await fetchPatternsFromServer();
+        if (synced) {
+          localStorage.setItem("karuta_teiichi_patterns", JSON.stringify(synced));
+          setSyncMessage("Googleから読み込みました");
+        } else {
+          setSyncMessage("Google読込に失敗しました");
+        }
+      }
+      const p = refreshPatterns();
+      if (p.length > 0) {
+        const active = p.find((pat) => pat.isActive) || p[0];
+        selectPattern(active);
+      }
+    };
+    void init();
   }, []);
 
   const selectPattern = (pattern: TeiichiPattern) => {
@@ -76,6 +115,7 @@ export default function TeiichiManager() {
     const newP = createPattern(name);
     if (newP) {
       const p = refreshPatterns();
+      void syncCurrentPatternsToServer(p);
       const created = p.find((pat) => pat.patternId === newP.patternId);
       if (created) selectPattern(created);
     }
@@ -85,6 +125,7 @@ export default function TeiichiManager() {
     if (!confirm("このパターンを削除しますか？")) return;
     deletePattern(patternId);
     const p = refreshPatterns();
+    void syncCurrentPatternsToServer(p);
     if (selectedPatternId === patternId) {
       if (p.length > 0) {
         selectPattern(p[0]);
@@ -99,22 +140,25 @@ export default function TeiichiManager() {
   const handleRename = (patternId: string) => {
     if (editingName.trim()) {
       renamePattern(patternId, editingName.trim());
-      refreshPatterns();
+      const p = refreshPatterns();
+      void syncCurrentPatternsToServer(p);
     }
     setEditingNameId(null);
   };
 
   const handleActivate = (patternId: string) => {
     setActivePattern(patternId);
-    refreshPatterns();
+    const p = refreshPatterns();
+    void syncCurrentPatternsToServer(p);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (selectedPatternId) {
       updateCardPositions(selectedPatternId, cardPositions);
+      const updated = refreshPatterns();
+      await syncCurrentPatternsToServer(updated);
       setSavedPositions({ ...cardPositions });
       setHasUnsavedChanges(false);
-      refreshPatterns();
     }
   };
 
@@ -248,6 +292,7 @@ export default function TeiichiManager() {
           <button className="btn btn-back" onClick={handleBack}>戻る</button>
           <h1 className="teiichi-title">定位置管理</h1>
           {hasUnsavedChanges && <span className="teiichi-unsaved-badge">未保存</span>}
+          {syncMessage && <span className="teiichi-sync-badge">{syncMessage}</span>}
         </div>
         <div className="teiichi-header-right">
           <button

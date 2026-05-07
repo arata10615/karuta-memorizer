@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import {
-  ensureUser,
   getUserId,
   getDisplayName,
   isGoogleLinked,
@@ -32,6 +31,7 @@ declare global {
 }
 
 const AUTO_LOGIN_KEY = "karuta_auto_login";
+const BUILD_MARK = import.meta.env.VITE_BUILD_MARK || "google-login-only";
 
 export default function StartScreen() {
   const [, navigate] = useLocation();
@@ -59,16 +59,8 @@ export default function StartScreen() {
     const isAutoLogin = localStorage.getItem(AUTO_LOGIN_KEY) === "true";
 
     if (isAutoLogin) {
-      const existingUserId = getUserId();
-      if (existingUserId) {
-        syncLoginState();
-        setLoading(false);
-      } else {
-        ensureUser().then(() => {
-          syncLoginState();
-          setLoading(false);
-        });
-      }
+      syncLoginState();
+      setLoading(false);
     } else {
       setLoading(false);
     }
@@ -112,16 +104,8 @@ export default function StartScreen() {
       }, 200);
       return () => clearInterval(interval);
     }
+    return undefined;
   }, [googleClientId, loggedIn, googleLinked, handleGoogleCallback]);
-
-  const handleDeviceLogin = async () => {
-    const userId = await ensureUser();
-    if (userId) {
-      syncLoginState();
-      localStorage.setItem(AUTO_LOGIN_KEY, "true");
-      setAutoLogin(true);
-    }
-  };
 
   const handleAutoLoginToggle = () => {
     const next = !autoLogin;
@@ -166,31 +150,20 @@ export default function StartScreen() {
 
           {!loggedIn ? (
             <>
-              <button className="start-btn start-btn-login" onClick={handleDeviceLogin}>
-                ログイン（デバイス）
-              </button>
               <div className="google-login-area">
                 {googleClientId ? (
                   <div ref={googleBtnRef} className="google-btn-container" />
                 ) : (
-                  <p className="google-not-configured">Google ログイン未設定</p>
+                  <p className="google-not-configured">Google ログイン未設定（APIのGOOGLE_CLIENT_ID か VITE_GOOGLE_CLIENT_ID を設定してください）</p>
                 )}
               </div>
             </>
           ) : (
             <>
               <div className="login-status-area">
-                <p className="login-status">
-                  {googleLinked ? "Google連携済み" : "デバイスログイン済み"}
-                </p>
+                <p className="login-status">Google連携済み</p>
                 {displayName && <p className="login-name">{displayName}</p>}
               </div>
-
-              {!googleLinked && googleClientId && (
-                <div className="google-login-area">
-                  <div ref={googleBtnRef} className="google-btn-container" />
-                </div>
-              )}
 
               <button className="start-btn start-btn-logout" onClick={handleLogout}>
                 ログアウト
@@ -231,6 +204,9 @@ export default function StartScreen() {
             </a>
           ))}
         </nav>
+        <p className="page-date" style={{ marginTop: 12, opacity: 0.65 }}>
+          build: {BUILD_MARK}
+        </p>
       </div>
     </div>
   );

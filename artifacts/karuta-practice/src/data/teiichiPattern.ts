@@ -12,6 +12,7 @@ export interface TeiichiPattern {
 
 const STORAGE_KEY = "karuta_teiichi_patterns";
 const MAX_PATTERNS = 10;
+const API_BASE = "/api";
 export const TEIICHI_ROWS = 3;
 export const TEIICHI_COLS = 50;
 export const BLOCK_SIZE = 25;
@@ -52,6 +53,36 @@ export function loadPatterns(): TeiichiPattern[] {
 
 function savePatterns(patterns: TeiichiPattern[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(patterns));
+}
+
+export async function savePatternsToServer(
+  userId: string,
+  patterns: TeiichiPattern[]
+): Promise<boolean> {
+  try {
+    const res = await fetch(`${API_BASE}/teiichi-patterns`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, patterns }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+export async function syncPatternsFromServer(userId: string): Promise<TeiichiPattern[] | null> {
+  try {
+    const res = await fetch(`${API_BASE}/teiichi-patterns?userId=${encodeURIComponent(userId)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!Array.isArray(data.patterns)) return null;
+    const patterns = data.patterns.filter(validatePattern);
+    savePatterns(patterns);
+    return patterns;
+  } catch {
+    return null;
+  }
 }
 
 export function createPattern(name: string): TeiichiPattern | null {

@@ -4,6 +4,7 @@ import placementsRouter from "./placements";
 import usersRouter from "./users";
 import adsRouter from "./ads";
 import contactRouter from "./contact";
+import teiichiPatternsRouter from "./teiichiPatterns";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(usersRouter);
 router.use(placementsRouter);
 router.use(adsRouter);
 router.use(contactRouter);
+router.use(teiichiPatternsRouter);
 
 export default router;

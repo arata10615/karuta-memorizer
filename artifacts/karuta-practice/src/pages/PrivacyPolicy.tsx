@@ -8,6 +8,19 @@ export default function PrivacyPolicy() {
       </p>
 
       <section className="page-section">
+        <h2>サイトURL</h2>
+        <p>
+          当サイトのホームページURLは
+          {" "}
+          <a href="https://karuta-memorizer.pages.dev/" target="_blank" rel="noopener noreferrer">
+            https://karuta-memorizer.pages.dev/
+          </a>
+          {" "}
+          です。
+        </p>
+      </section>
+
+      <section className="page-section">
         <h2>取得する情報について</h2>
         <p>
           当サイトでは、サービスの提供・改善のために、以下の情報を取得することがあります。

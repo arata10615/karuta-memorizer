@@ -53,7 +53,6 @@ export default function KarutaBoard() {
   const [selectedCard, setSelectedCard] = useState<number | null>(null);
   const [faceUpMap, setFaceUpMap] = useState<Record<number, boolean>>({});
   const [dragState, setDragState] = useState<DragState | null>(null);
-  const [selfAutoPlaced, setSelfAutoPlaced] = useState(false);
   const [showInterstitial, setShowInterstitial] = useState(false);
   const [adConfig, setAdConfig] = useState<{ sidebarSlot: string; interstitialSlot: string }>({ sidebarSlot: "", interstitialSlot: "" });
   const resetCount = useRef(0);
@@ -70,8 +69,7 @@ export default function KarutaBoard() {
   const initBoard = useCallback(async () => {
     const { myCards, opCards } = dealRandomCards();
     myCardCount.current = myCards.length;
-    const rowCounts = [10, 8, 7];
-    const opponentGrid = await generateOpponentGrid(opCards, GRID_ROWS, GRID_COLS, rowCounts);
+    const opponentGrid = await generateOpponentGrid(opCards, GRID_ROWS, GRID_COLS);
     setOpGrid(opponentGrid);
     setSelfGrid(createEmptyGrid());
     setHandCards([...myCards]);
@@ -80,7 +78,6 @@ export default function KarutaBoard() {
     setGameState("placing");
     setFaceUpMap({});
     setDragState(null);
-    setSelfAutoPlaced(false);
     dragRef.current = null;
   }, []);
 
@@ -351,7 +348,6 @@ export default function KarutaBoard() {
   };
 
   const autoPlace = async () => {
-    const rowCounts = [7, 8, 10];
     const activePattern = getActivePattern();
     const allCardIds = [...handCards];
     for (let r = 0; r < GRID_ROWS; r++) {
@@ -369,13 +365,11 @@ export default function KarutaBoard() {
           allCardIds,
           activePattern,
           GRID_ROWS,
-          GRID_COLS,
-          rowCounts
+          GRID_COLS
         );
         setSelfGrid(newGrid);
         setHandCards([]);
         setSelectedCard(null);
-        setSelfAutoPlaced(true);
         return;
       }
     }
@@ -383,7 +377,7 @@ export default function KarutaBoard() {
 
   const startMemorizing = () => {
     if (!allPlaced) return;
-    recordPlacement(selfAutoPlaced ? null : selfGrid, opGrid);
+    recordPlacement();
     setGameState("memorizing");
     setElapsed(0);
     intervalRef.current = setInterval(() => setElapsed((p) => p + 1), 1000);

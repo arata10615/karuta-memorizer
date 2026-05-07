@@ -1,50 +1,10 @@
 const API_BASE = "/api";
 
-const DEVICE_ID_KEY = "karuta_device_id";
 const USER_ID_KEY = "karuta_user_id";
 const DISPLAY_NAME_KEY = "karuta_display_name";
 const GOOGLE_LINKED_KEY = "karuta_google_linked";
 
-function getDeviceId(): string {
-  let deviceId = localStorage.getItem(DEVICE_ID_KEY);
-  if (!deviceId) {
-    deviceId = crypto.randomUUID();
-    localStorage.setItem(DEVICE_ID_KEY, deviceId);
-  }
-  return deviceId;
-}
-
 let cachedUserId: string | null = null;
-
-export async function ensureUser(): Promise<string | null> {
-  if (cachedUserId) return cachedUserId;
-
-  const stored = localStorage.getItem(USER_ID_KEY);
-  if (stored) {
-    cachedUserId = stored;
-    return stored;
-  }
-
-  try {
-    const deviceId = getDeviceId();
-    const res = await fetch(`${API_BASE}/users/device`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ deviceId }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const userId = data.user?.id;
-    if (userId) {
-      localStorage.setItem(USER_ID_KEY, userId);
-      cachedUserId = userId;
-    }
-    return userId || null;
-  } catch (err) {
-    console.error("Failed to ensure user:", err);
-    return null;
-  }
-}
 
 export function getUserId(): string | null {
   return cachedUserId || localStorage.getItem(USER_ID_KEY);
@@ -66,6 +26,10 @@ export function logout() {
 }
 
 export async function getGoogleClientId(): Promise<string | null> {
+  const clientIdFromEnv = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  if (typeof clientIdFromEnv === "string" && clientIdFromEnv.trim().length > 0) {
+    return clientIdFromEnv.trim();
+  }
   try {
     const res = await fetch(`${API_BASE}/users/google-client-id`);
     if (!res.ok) return null;
@@ -81,11 +45,10 @@ export async function loginWithGoogle(credential: string): Promise<{
   displayName: string | null;
 } | null> {
   try {
-    const deviceId = getDeviceId();
     const res = await fetch(`${API_BASE}/users/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ credential, deviceId }),
+      body: JSON.stringify({ credential }),
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -104,186 +67,40 @@ export async function loginWithGoogle(credential: string): Promise<{
   }
 }
 
-let cachedGlobalModel: Record<number, Record<string, number>> | null = null;
-let cachedGlobalPairs: { cardA: number; cardB: number; count: number }[] | null = null;
-
-export async function recordPlacement(
-  selfGrid: (number | null)[][] | null,
-  opGrid: (number | null)[][]
-) {
-  try {
-    const userId = getUserId();
-    const body: Record<string, unknown> = { opGrid, userId };
-    if (selfGrid) body.selfGrid = selfGrid;
-    await fetch(`${API_BASE}/placements`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    cachedGlobalModel = null;
-    cachedGlobalPairs = null;
-  } catch (err) {
-    console.error("Failed to record placement:", err);
-  }
+export async function recordPlacement(): Promise<void> {
+  // 敵陣学習機能の廃止準備: 学習データの保存は停止
 }
 
-interface PlacementModel {
-  model: Record<number, Record<string, number>>;
-  pairs: { cardA: number; cardB: number; count: number }[];
-  totalSessions: number;
-}
-
-async function fetchModel(field: string): Promise<PlacementModel> {
-  try {
-    const params = new URLSearchParams({ field });
-    const res = await fetch(`${API_BASE}/placements/model?${params}`);
-    if (!res.ok) return { model: {}, pairs: [], totalSessions: 0 };
-    return await res.json();
-  } catch (err) {
-    console.error("Failed to fetch placement model:", err);
-    return { model: {}, pairs: [], totalSessions: 0 };
-  }
-}
+const PRESET_ROW_COUNTS: number[][] = [
+  [8, 8, 9],
+  [9, 8, 8],
+  [8, 9, 8],
+  [7, 9, 9],
+  [9, 9, 7],
+];
 
 export async function generateOpponentGrid(
   cardIds: number[],
   gridRows: number,
-  gridCols: number,
-  rowCounts: number[]
+  gridCols: number
 ): Promise<(number | null)[][]> {
   const grid: (number | null)[][] = Array.from({ length: gridRows }, () =>
     Array.from({ length: gridCols }, () => null)
   );
+  const shuffled = [...cardIds].sort(() => Math.random() - 0.5);
+  const rowCounts = PRESET_ROW_COUNTS[Math.floor(Math.random() * PRESET_ROW_COUNTS.length)];
 
-  if (!cachedGlobalModel) {
-    const modelData = await fetchModel("self");
-    cachedGlobalModel = modelData.model;
-    cachedGlobalPairs = modelData.pairs;
-  }
-
-  const model = cachedGlobalModel;
-  const pairs = cachedGlobalPairs || [];
-  const hasData = Object.keys(model).length > 0;
-
-  if (!hasData) {
-    return fallbackPlace([...cardIds], grid, gridRows, gridCols, rowCounts);
-  }
-
-  return patternPlace([...cardIds], grid, gridRows, gridCols, rowCounts, model, pairs);
-}
-
-function patternPlace(
-  remaining: number[],
-  grid: (number | null)[][],
-  gridRows: number,
-  gridCols: number,
-  rowCounts: number[],
-  model: Record<number, Record<string, number>>,
-  pairs: { cardA: number; cardB: number; count: number }[]
-): (number | null)[][] {
-  const availableSlots: { r: number; c: number }[] = [];
+  let index = 0;
   for (let r = 0; r < gridRows; r++) {
-    const maxForRow = rowCounts[r] || gridCols;
-    const leftCount = Math.ceil(maxForRow / 2);
-    const rightCount = maxForRow - leftCount;
-    for (let c = 0; c < leftCount; c++) {
-      if (grid[r][c] === null) availableSlots.push({ r, c });
+    const count = Math.min(rowCounts[r] || gridCols, shuffled.length - index);
+    const leftCount = Math.ceil(count / 2);
+    const rightCount = count - leftCount;
+
+    for (let c = 0; c < leftCount && index < shuffled.length; c++) {
+      grid[r][c] = shuffled[index++];
     }
-    for (let c = 0; c < rightCount; c++) {
-      const col = gridCols - 1 - c;
-      if (grid[r][col] === null) availableSlots.push({ r, c: col });
-    }
-  }
-
-  const pairMap = new Map<string, number>();
-  for (const p of pairs) {
-    const key = p.cardA < p.cardB ? `${p.cardA},${p.cardB}` : `${p.cardB},${p.cardA}`;
-    pairMap.set(key, (pairMap.get(key) || 0) + p.count);
-  }
-
-  const cards = [...remaining];
-  const placed: { cardId: number; r: number; c: number }[] = [];
-
-  for (let iter = 0; iter < cards.length && availableSlots.length > 0; iter++) {
-    let bestCard = -1;
-    let bestSlot = -1;
-    let bestScore = -1;
-
-    for (let ci = 0; ci < cards.length; ci++) {
-      const cardId = cards[ci];
-      const cardModel = model[cardId];
-
-      for (let si = 0; si < availableSlots.length; si++) {
-        const slot = availableSlots[si];
-        let score = 0;
-
-        if (cardModel) {
-          const key = `${slot.r},${slot.c}`;
-          score += (cardModel[key] || 0) * 10;
-        }
-
-        for (const p of placed) {
-          if (p.r === slot.r && Math.abs(p.c - slot.c) === 1) {
-            const pairKey = cardId < p.cardId ? `${cardId},${p.cardId}` : `${p.cardId},${cardId}`;
-            score += (pairMap.get(pairKey) || 0) * 5;
-          }
-        }
-
-        if (score > bestScore) {
-          bestScore = score;
-          bestCard = ci;
-          bestSlot = si;
-        }
-      }
-    }
-
-    if (bestCard >= 0 && bestSlot >= 0) {
-      const slot = availableSlots[bestSlot];
-      const cardId = cards[bestCard];
-      grid[slot.r][slot.c] = cardId;
-      placed.push({ cardId, r: slot.r, c: slot.c });
-      cards.splice(bestCard, 1);
-      availableSlots.splice(bestSlot, 1);
-    }
-  }
-
-  if (cards.length > 0) {
-    return fallbackPlace(cards, grid, gridRows, gridCols, rowCounts);
-  }
-
-  return grid;
-}
-
-function fallbackPlace(
-  remaining: number[],
-  grid: (number | null)[][],
-  gridRows: number,
-  gridCols: number,
-  rowCounts: number[]
-): (number | null)[][] {
-  const shuffled = [...remaining].sort(() => Math.random() - 0.5);
-  for (let r = 0; r < gridRows && shuffled.length > 0; r++) {
-    const existing = grid[r].filter((c) => c !== null).length;
-    const maxForRow = rowCounts[r] || gridCols;
-    const need = Math.min(maxForRow - existing, shuffled.length);
-    if (need <= 0) continue;
-
-    const leftCount = Math.ceil(need / 2);
-    const rightCount = need - leftCount;
-
-    let placed = 0;
-    for (let c = 0; c < gridCols && placed < leftCount; c++) {
-      if (grid[r][c] === null) {
-        grid[r][c] = shuffled.shift()!;
-        placed++;
-      }
-    }
-    placed = 0;
-    for (let c = 0; c < gridCols && placed < rightCount; c++) {
-      if (grid[r][gridCols - 1 - c] === null) {
-        grid[r][gridCols - 1 - c] = shuffled.shift()!;
-        placed++;
-      }
+    for (let c = 0; c < rightCount && index < shuffled.length; c++) {
+      grid[r][gridCols - 1 - c] = shuffled[index++];
     }
   }
   return grid;
