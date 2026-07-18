@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
 import { OAuth2Client } from "google-auth-library";
+import { createSessionToken } from "../lib/auth";
 
 const router = Router();
 
@@ -55,6 +56,7 @@ router.post("/users/google", async (req, res) => {
           id: user.id,
           displayName: displayName || user.displayName,
           googleId,
+          sessionToken: createSessionToken(user.id),
         },
       });
       return;
@@ -71,6 +73,7 @@ router.post("/users/google", async (req, res) => {
         id: inserted[0].id,
         displayName: inserted[0].displayName,
         googleId: inserted[0].googleId,
+        sessionToken: createSessionToken(inserted[0].id),
       },
     });
   } catch (err) {

@@ -3,8 +3,11 @@ import cors from "cors";
 import pinoHttp from "pino-http";
 import router from "./routes";
 import { logger } from "./lib/logger";
+import { validateAuthConfiguration } from "./lib/auth";
 
 const app: Express = express();
+
+validateAuthConfiguration();
 
 app.use(
   pinoHttp({
@@ -25,7 +28,22 @@ app.use(
     },
   }),
 );
-app.use(cors());
+const allowedOrigins = process.env.WEB_ORIGIN
+  ?.split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+if (process.env.NODE_ENV === "production" && (!allowedOrigins || allowedOrigins.length === 0)) {
+  throw new Error("WEB_ORIGIN must be set in production");
+}
+
+app.use(
+  cors({
+    origin: allowedOrigins && allowedOrigins.length > 0 ? allowedOrigins : true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  }),
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

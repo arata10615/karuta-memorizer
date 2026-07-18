@@ -1,3 +1,6 @@
+import { apiUrl } from "./api";
+import { getAuthenticatedHeaders } from "./placementMemory";
+
 export interface CardPosition {
   row: number;
   col: number;
@@ -12,7 +15,7 @@ export interface TeiichiPattern {
 
 const STORAGE_KEY = "karuta_teiichi_patterns";
 const MAX_PATTERNS = 10;
-const API_BASE = "/api";
+
 export const TEIICHI_ROWS = 3;
 export const TEIICHI_COLS = 50;
 export const BLOCK_SIZE = 25;
@@ -55,15 +58,12 @@ function savePatterns(patterns: TeiichiPattern[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(patterns));
 }
 
-export async function savePatternsToServer(
-  userId: string,
-  patterns: TeiichiPattern[]
-): Promise<boolean> {
+export async function savePatternsToServer(patterns: TeiichiPattern[]): Promise<boolean> {
   try {
-    const res = await fetch(`${API_BASE}/teiichi-patterns`, {
+    const res = await fetch(apiUrl("/teiichi-patterns"), {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, patterns }),
+      headers: { "Content-Type": "application/json", ...getAuthenticatedHeaders() },
+      body: JSON.stringify({ patterns }),
     });
     return res.ok;
   } catch {
@@ -71,9 +71,11 @@ export async function savePatternsToServer(
   }
 }
 
-export async function syncPatternsFromServer(userId: string): Promise<TeiichiPattern[] | null> {
+export async function syncPatternsFromServer(): Promise<TeiichiPattern[] | null> {
   try {
-    const res = await fetch(`${API_BASE}/teiichi-patterns?userId=${encodeURIComponent(userId)}`);
+    const res = await fetch(apiUrl("/teiichi-patterns"), {
+      headers: getAuthenticatedHeaders(),
+    });
     if (!res.ok) return null;
     const data = await res.json();
     if (!Array.isArray(data.patterns)) return null;

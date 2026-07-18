@@ -8,6 +8,7 @@ import {
   TeiichiPattern,
   loadPatterns,
   savePatternsToServer,
+  syncPatternsFromServer,
   createPattern,
   deletePattern,
   renamePattern,
@@ -19,7 +20,7 @@ import {
   BLOCK_SIZE,
   CardPosition,
 } from "@/data/teiichiPattern";
-import { getUserId, isGoogleLinked } from "@/data/placementMemory";
+import { isGoogleLinked } from "@/data/placementMemory";
 
 export default function TeiichiManager() {
   const [, navigate] = useLocation();
@@ -47,32 +48,21 @@ export default function TeiichiManager() {
   }, []);
 
   const syncCurrentPatternsToServer = useCallback(async (nextPatterns?: TeiichiPattern[]) => {
-    const userId = getUserId();
-    if (!userId || !isGoogleLinked()) return true;
+    if (!isGoogleLinked()) return true;
     const payload = nextPatterns ?? loadPatterns();
-    const ok = await savePatternsToServer(userId, payload);
+    const ok = await savePatternsToServer(payload);
     setSyncMessage(ok ? "Googleに同期しました" : "Google同期に失敗しました");
     return ok;
   }, []);
 
   const fetchPatternsFromServer = useCallback(async () => {
-    const userId = getUserId();
-    if (!userId || !isGoogleLinked()) return null;
-    try {
-      const res = await fetch(`/api/teiichi-patterns?userId=${encodeURIComponent(userId)}`);
-      if (!res.ok) return null;
-      const data = await res.json();
-      if (!Array.isArray(data.patterns)) return null;
-      return data.patterns as TeiichiPattern[];
-    } catch {
-      return null;
-    }
+    if (!isGoogleLinked()) return null;
+    return syncPatternsFromServer();
   }, []);
 
   useEffect(() => {
     const init = async () => {
-      const userId = getUserId();
-      if (userId && isGoogleLinked()) {
+      if (isGoogleLinked()) {
         const synced = await fetchPatternsFromServer();
         if (synced) {
           localStorage.setItem("karuta_teiichi_patterns", JSON.stringify(synced));

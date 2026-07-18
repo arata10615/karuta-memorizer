@@ -1,8 +1,9 @@
-const API_BASE = "/api";
+import { apiUrl } from "./api";
 
 const USER_ID_KEY = "karuta_user_id";
 const DISPLAY_NAME_KEY = "karuta_display_name";
 const GOOGLE_LINKED_KEY = "karuta_google_linked";
+const SESSION_TOKEN_KEY = "karuta_session_token";
 
 let cachedUserId: string | null = null;
 
@@ -15,13 +16,23 @@ export function getDisplayName(): string | null {
 }
 
 export function isGoogleLinked(): boolean {
-  return localStorage.getItem(GOOGLE_LINKED_KEY) === "true";
+  return Boolean(getSessionToken()) && localStorage.getItem(GOOGLE_LINKED_KEY) === "true";
+}
+
+export function getSessionToken(): string | null {
+  return localStorage.getItem(SESSION_TOKEN_KEY);
+}
+
+export function getAuthenticatedHeaders(): Record<string, string> {
+  const token = getSessionToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export function logout() {
   localStorage.removeItem(USER_ID_KEY);
   localStorage.removeItem(DISPLAY_NAME_KEY);
   localStorage.removeItem(GOOGLE_LINKED_KEY);
+  localStorage.removeItem(SESSION_TOKEN_KEY);
   cachedUserId = null;
 }
 
@@ -31,7 +42,7 @@ export async function getGoogleClientId(): Promise<string | null> {
     return clientIdFromEnv.trim();
   }
   try {
-    const res = await fetch(`${API_BASE}/users/google-client-id`);
+    const res = await fetch(apiUrl("/users/google-client-id"));
     if (!res.ok) return null;
     const data = await res.json();
     return data.clientId || null;
@@ -45,7 +56,7 @@ export async function loginWithGoogle(credential: string): Promise<{
   displayName: string | null;
 } | null> {
   try {
-    const res = await fetch(`${API_BASE}/users/google`, {
+    const res = await fetch(apiUrl("/users/google"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ credential }),
@@ -53,8 +64,9 @@ export async function loginWithGoogle(credential: string): Promise<{
     if (!res.ok) return null;
     const data = await res.json();
     const user = data.user;
-    if (user?.id) {
+    if (user?.id && typeof user.sessionToken === "string") {
       localStorage.setItem(USER_ID_KEY, user.id);
+      localStorage.setItem(SESSION_TOKEN_KEY, user.sessionToken);
       cachedUserId = user.id;
       if (user.displayName) localStorage.setItem(DISPLAY_NAME_KEY, user.displayName);
       localStorage.setItem(GOOGLE_LINKED_KEY, "true");
@@ -82,25 +94,25 @@ const PRESET_ROW_COUNTS: number[][] = [
 export async function generateOpponentGrid(
   cardIds: number[],
   gridRows: number,
-  gridCols: number
+  gridCols: number,
 ): Promise<(number | null)[][]> {
   const grid: (number | null)[][] = Array.from({ length: gridRows }, () =>
-    Array.from({ length: gridCols }, () => null)
+    Array.from({ length: gridCols }, () => null),
   );
   const shuffled = [...cardIds].sort(() => Math.random() - 0.5);
   const rowCounts = PRESET_ROW_COUNTS[Math.floor(Math.random() * PRESET_ROW_COUNTS.length)];
 
   let index = 0;
-  for (let r = 0; r < gridRows; r++) {
-    const count = Math.min(rowCounts[r] || gridCols, shuffled.length - index);
+  for (let row = 0; row < gridRows; row++) {
+    const count = Math.min(rowCounts[row] || gridCols, shuffled.length - index);
     const leftCount = Math.ceil(count / 2);
     const rightCount = count - leftCount;
 
-    for (let c = 0; c < leftCount && index < shuffled.length; c++) {
-      grid[r][c] = shuffled[index++];
+    for (let column = 0; column < leftCount && index < shuffled.length; column++) {
+      grid[row][column] = shuffled[index++];
     }
-    for (let c = 0; c < rightCount && index < shuffled.length; c++) {
-      grid[r][gridCols - 1 - c] = shuffled[index++];
+    for (let column = 0; column < rightCount && index < shuffled.length; column++) {
+      grid[row][gridCols - 1 - column] = shuffled[index++];
     }
   }
   return grid;
